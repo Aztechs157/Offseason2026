@@ -35,24 +35,25 @@ public class IntakeIOSparkMax implements IntakeIO {
     // Step 1: Create SmartMotorControllerConfig
     SmartMotorControllerConfig smcConfig =
         new SmartMotorControllerConfig(subsystem)
-            .withGearing(new MechanismGearing(GearBox.fromReductionStages(5, 4)))
-            .withMechanismCircumference(Inches.of(1.5 * Math.PI)) // Pulley circumference
+            .withGearing(new MechanismGearing(GearBox.fromStages("5:1")))
+            .withMechanismCircumference(Inches.of(19.6)) // sprocket circumference
             .withClosedLoopController(10, 0, 0.5)
             .withFeedforward(new ElevatorFeedforward(0.1, 0.2, 0.5, 0.01))
             .withTrapezoidalProfile(MetersPerSecond.of(1.0), MetersPerSecondPerSecond.of(2.0));
-
+            
     // Step 2: Create SmartMotorController (TalonFXWrapper)
     SmartMotorController smc = new SparkWrapper(sparkmax, DCMotor.getNEO(1), smcConfig);
 
     // Step 3: Create IntakeConfig with the SmartMotorController
     ElevatorConfig intakeConfig =
         new ElevatorConfig(smc)
-            .withDrumRadius(Inches.of(0.75)) // Drum radius for pulley
+            .withDrumRadius(Inches.of(0.7)) // Drum radius for pulley
             .withMass(Pounds.of(10)) // Carriage mass - used for simulation physics
             .withHardLimits(Meters.of(0), Meters.of(1.5)) // Physical hard stops for sim
             .withSoftLimits(Meters.of(0.02), Meters.of(1.2))
-            .withStartingHeight(Meters.of(0.5))
+            .withStartingHeight(Meters.of(0))
             .withAngle(Degrees.of(0)) // Vertical elevator
+        
             .withTelemetry("Intake", TelemetryVerbosity.HIGH);
 
     // Step 4: Create Intake mechanism - handles simulation automatically!
