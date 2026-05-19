@@ -8,6 +8,7 @@
 package org.team157.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -15,6 +16,10 @@ import edu.wpi.first.wpilibj.RobotBase;
  * (log replay from a file).
  */
 public final class Constants {
+  public static class TelemetryConstants {
+    public static final TelemetryVerbosity TELEMETRY_VERBOSITY = TelemetryVerbosity.LOW;
+  }
+
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 

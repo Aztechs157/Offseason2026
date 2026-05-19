@@ -25,6 +25,8 @@ import org.team157.robot.subsystems.drive.GyroIOPigeon2;
 import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
+import org.team157.robot.subsystems.uptake.Uptake;
+import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,6 +43,7 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+  public Uptake uptake = new Uptake();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -120,6 +123,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    uptake.setIO(new UptakeIOSparkMax(uptake));
   }
 
   /**
