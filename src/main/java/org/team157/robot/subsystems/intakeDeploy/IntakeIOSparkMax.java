@@ -1,4 +1,4 @@
-package org.team157.robot.subsystems.drive.intakeDeploy;
+package org.team157.robot.subsystems.intakeDeploy;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Celsius;
@@ -75,8 +75,6 @@ public class IntakeIOSparkMax implements IntakeIO {
     //     motor.getTargetPosition().map(d -> d.in(Meters)).orElse(0.0);
   }
 
-
-
   @Override
   public void setTargetPosition(double meters) {
     // Use SmartMotorController's setPosition method with Distance
@@ -91,9 +89,10 @@ public class IntakeIOSparkMax implements IntakeIO {
   /** Access the Elevator mechanism for command helpers like run() and runTo() */
   public Elevator getIntake() {
     return intake;
-  }   
-     @Override
-    public void simIterate(){
-        intake.simIterate();
-    }
+  }
+
+  @Override
+  public void simIterate() {
+    intake.simIterate();
+  }
 }

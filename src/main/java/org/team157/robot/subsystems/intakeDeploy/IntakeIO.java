@@ -1,4 +1,4 @@
-package org.team157.robot.subsystems.drive.intakeDeploy;
+package org.team157.robot.subsystems.intakeDeploy;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -15,7 +15,6 @@ public interface IntakeIO {
   }
 
   default void updateInputs(IntakeIOInputs inputs) {}
-  
 
   default void setTargetPosition(double meters) {}
 

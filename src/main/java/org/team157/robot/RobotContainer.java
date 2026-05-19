@@ -25,8 +25,8 @@ import org.team157.robot.subsystems.drive.GyroIOPigeon2;
 import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
-import org.team157.robot.subsystems.drive.intakeDeploy.Intake;
-import org.team157.robot.subsystems.drive.intakeDeploy.IntakeIOSparkMax;
+import org.team157.robot.subsystems.intakeDeploy.Intake;
+import org.team157.robot.subsystems.intakeDeploy.IntakeIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
