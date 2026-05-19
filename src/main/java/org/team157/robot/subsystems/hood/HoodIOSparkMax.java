@@ -65,8 +65,8 @@ public class HoodIOSparkMax implements HoodIO {
     // Configure the physical characteristics of the hood.
     PivotConfig hoodConfig =
         new PivotConfig(smartHoodMotor)
-            // .withStartingPosition(
-            //     Degrees.of(mapHoodEncoder(HoodConstants.MIN_ANGLE, HoodConstants.MAX_ANGLE)))
+            .withStartingPosition(
+                Degrees.of(mapHoodEncoder(HoodConstants.MIN_ANGLE, HoodConstants.MAX_ANGLE)))
             .withHardLimit(HoodConstants.LOWER_HARD_LIMIT, HoodConstants.UPPER_HARD_LIMIT)
             .withMOI(Meters.of(0.2), Kilograms.of(0.5));
 

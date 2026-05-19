@@ -26,6 +26,7 @@ import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.hood.Hood;
+import org.team157.robot.subsystems.hood.HoodIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -123,6 +124,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
+    hood.setIO(new HoodIOSparkMax(hood));
   }
 
   /**
