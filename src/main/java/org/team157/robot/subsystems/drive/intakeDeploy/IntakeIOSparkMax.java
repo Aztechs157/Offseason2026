@@ -40,7 +40,7 @@ public class IntakeIOSparkMax implements IntakeIO {
             .withClosedLoopController(10, 0, 0.5)
             .withFeedforward(new ElevatorFeedforward(0.1, 0.2, 0.5, 0.01))
             .withTrapezoidalProfile(MetersPerSecond.of(1.0), MetersPerSecondPerSecond.of(2.0));
-            
+
     // Step 2: Create SmartMotorController (TalonFXWrapper)
     SmartMotorController smc = new SparkWrapper(sparkmax, DCMotor.getNEO(1), smcConfig);
 
@@ -53,7 +53,6 @@ public class IntakeIOSparkMax implements IntakeIO {
             .withSoftLimits(Meters.of(0.02), Meters.of(1.2))
             .withStartingHeight(Meters.of(0))
             .withAngle(Degrees.of(0)) // Vertical elevator
-        
             .withTelemetry("Intake", TelemetryVerbosity.HIGH);
 
     // Step 4: Create Intake mechanism - handles simulation automatically!
@@ -76,6 +75,8 @@ public class IntakeIOSparkMax implements IntakeIO {
     //     motor.getTargetPosition().map(d -> d.in(Meters)).orElse(0.0);
   }
 
+
+
   @Override
   public void setTargetPosition(double meters) {
     // Use SmartMotorController's setPosition method with Distance
@@ -90,5 +91,9 @@ public class IntakeIOSparkMax implements IntakeIO {
   /** Access the Elevator mechanism for command helpers like run() and runTo() */
   public Elevator getIntake() {
     return intake;
-  }
+  }   
+     @Override
+    public void simIterate(){
+        intake.simIterate();
+    }
 }

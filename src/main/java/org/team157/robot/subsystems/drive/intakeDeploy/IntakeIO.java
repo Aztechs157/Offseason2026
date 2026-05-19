@@ -15,6 +15,7 @@ public interface IntakeIO {
   }
 
   default void updateInputs(IntakeIOInputs inputs) {}
+  
 
   default void setTargetPosition(double meters) {}
 
