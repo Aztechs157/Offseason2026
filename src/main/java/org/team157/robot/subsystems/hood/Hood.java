@@ -4,14 +4,12 @@
 
 package org.team157.robot.subsystems.hood;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
-//   TODO: re impliment when have needed subsystems set up 
+//   TODO: re impliment when have needed subsystems set up
 // import org.team157.robot.Constants.ModelConstants;
 // import org.team157.robot.subsystems.drive.DriveSystem;
 // import org.team157.robot.subsystems.flywheel.Flywheel;
@@ -46,10 +44,10 @@ public class Hood extends SubsystemBase {
    *
    * @return Command setting the duty cycle output of the hood's motor to 0
    */
-  //   TODO: re impliment when have needed subsystems set up 
-//   public Command getDefault(DriveSystem drivetrain) {
-//     return io.setTargetAngle(HoodConstants.UPPER_SOFT_LIMIT);
-//   }
+  //   TODO: re impliment when have needed subsystems set up
+  //   public Command getDefault(DriveSystem drivetrain) {
+  //     return io.setTargetAngle(HoodConstants.UPPER_SOFT_LIMIT);
+  //   }
 
   /**
    * Set the target angle of the hood.
@@ -84,10 +82,10 @@ public class Hood extends SubsystemBase {
    * @return A Command setting the angle of the Hood to the desired angle, determined by the
    *     Flywheel's ballistics calculations.
    */
-  //   TODO: re impliment when have needed subsystems set up 
-//   public Command setDynamicHoodAngle() {
-//     return setAngle(Flywheel::getDesiredHoodAngle);
-//   }
+  //   TODO: re impliment when have needed subsystems set up
+  //   public Command setDynamicHoodAngle() {
+  //     return setAngle(Flywheel::getDesiredHoodAngle);
+  //   }
 
   /**
    * Get the current angle of the hood, based on the YAMS pivot system, relative to the simulated
@@ -95,16 +93,16 @@ public class Hood extends SubsystemBase {
    *
    * @return The angle of the hood, in degrees, from -180 to 180, using the YAMS pivot system.
    */
-  //   TODO: re impliment when have needed subsystems set up 
-//   public double getScaledPosAngleSim() {
-//     return PosUtils.mapRange(
-//             inputs.angleDegrees,
-//             HoodConstants.MIN_ANGLE,
-//             HoodConstants.MAX_ANGLE,
-//             HoodConstants.MAX_ANGLE,
-//             HoodConstants.MIN_ANGLE)
-//         - 40;
-//   }
+  //   TODO: re impliment when have needed subsystems set up
+  //   public double getScaledPosAngleSim() {
+  //     return PosUtils.mapRange(
+  //             inputs.angleDegrees,
+  //             HoodConstants.MIN_ANGLE,
+  //             HoodConstants.MAX_ANGLE,
+  //             HoodConstants.MAX_ANGLE,
+  //             HoodConstants.MIN_ANGLE)
+  //         - 40;
+  //   }
 
   @Override
   public void periodic() {
@@ -122,10 +120,10 @@ public class Hood extends SubsystemBase {
 
   // TODO: make a Mechanism3d class distinct from each subsystem and RobotContainer for storing
   // poses for the model
-//   TODO: re impliment when have needed subsystems set up 
-//   public Pose3d getHoodPose() {
-//     return new Pose3d(
-//         ModelConstants.ORIGIN_TO_HOOD_PIVOT_POINT_OFFSET,
-//         new Rotation3d(0, -(inputs.angleDegrees), 0));
-//   } 
+  //   TODO: re impliment when have needed subsystems set up
+  //   public Pose3d getHoodPose() {
+  //     return new Pose3d(
+  //         ModelConstants.ORIGIN_TO_HOOD_PIVOT_POINT_OFFSET,
+  //         new Rotation3d(0, -(inputs.angleDegrees), 0));
+  //   }
 }

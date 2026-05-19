@@ -25,6 +25,7 @@ import org.team157.robot.subsystems.drive.GyroIOPigeon2;
 import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
+import org.team157.robot.subsystems.hood.Hood;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -41,6 +42,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  public Hood hood = new Hood();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
