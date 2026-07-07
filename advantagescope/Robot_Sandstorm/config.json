@@ -1,0 +1,26 @@
+{
+  "name": "Sandstorm",
+  "isFTC": "false",
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 180
+
+    }, {
+      "axis": "z",
+      "degrees": 90
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0
+  ],
+  "cameras": [],
+  "components": [],
+  "zeroedPosition": [
+    0,
+    0,
+    0
+  ]
+}
