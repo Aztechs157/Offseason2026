@@ -1,4 +1,4 @@
-package org.team157.robot.subsystems.uptake;
+package org.team157.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -8,20 +8,20 @@ import org.littletonrobotics.junction.AutoLog;
  * Defines the input data to be logged by AdvantageKit, along with methods and {@link Command}s
  * which an implementation of this IO interface must have.
  */
-public interface UptakeIO {
+public interface IntakeIO {
 
   /**
    * Represents the set of inputs which are to be logged by AdvantageKit and updated by an
-   * implementation of the {@link UptakeIO} interface.
+   * implementation of the {@link IntakeIO} interface.
    */
   @AutoLog
-  public static class UptakeIOInputs {
+  public static class IntakeIOInputs {
     public double supplyCurrentAmps = 0.0;
     public double statorCurrentAmps = 0.0;
     public double appliedVolts = 0.0;
     public double temperatureCelsius = 0.0;
     public double mechanismVelocityDegreesPerSecond = 0.0;
-    public boolean uptakeRunning = false;
+    public boolean intakeRunning = false;
   }
 
   /**
@@ -30,13 +30,13 @@ public interface UptakeIO {
    * @param inputs The set of inputs to be logged, including information on the motors and
    *     mechanism.
    */
-  default void updateInputs(UptakeIOInputs inputs) {}
+  default void updateInputs(IntakeIOInputs inputs) {}
 
-  /** Updates the values for the simulated version of the uptake mechanism. */
+  /** Updates the values for the simulated version of the intake mechanism. */
   default void simIterate() {}
 
   /**
-   * Stops the uptake rollers.
+   * Stops the intake rollers.
    *
    * @return a {@link Command} setting the motors' output power to 0.
    */
@@ -45,7 +45,7 @@ public interface UptakeIO {
   }
 
   /**
-   * Directly sets the output duty cycle of the uptake rollers' motors.
+   * Directly sets the output duty cycle of the intake rollers' motors.
    *
    * @param dutyCycle The duty cycle to apply to the motor, between -1 and 1.
    * @return a {@link Command} setting the motor's duty cycle to the specified value.
