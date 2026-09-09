@@ -86,7 +86,7 @@ public class TunerConstants {
   // Measured robot speed (m/s) at 12 V applied output;
   // This is NOT the desired max robot speed - see MaxSpeed in RobotContainer instead;
   // This needs to be tuned to your individual robot
-  public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(10.08);
+  public static final LinearVelocity kSpeedAt12Volts = MetersPerSecond.of(5.04);
 
   // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
   // This may need to be tuned to your individual robot
@@ -144,7 +144,7 @@ public class TunerConstants {
   private static final int kFrontLeftDriveMotorId = 8;
   private static final int kFrontLeftSteerMotorId = 9;
   private static final int kFrontLeftEncoderId = 7;
-  private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.46142578125);
+  private static final Angle kFrontLeftEncoderOffset = Rotations.of(-0.48193359375);
   private static final boolean kFrontLeftSteerMotorInverted = true;
   private static final boolean kFrontLeftEncoderInverted = false;
 
@@ -155,7 +155,7 @@ public class TunerConstants {
   private static final int kFrontRightDriveMotorId = 5;
   private static final int kFrontRightSteerMotorId = 6;
   private static final int kFrontRightEncoderId = 4;
-  private static final Angle kFrontRightEncoderOffset = Rotations.of(0.422607421875);
+  private static final Angle kFrontRightEncoderOffset = Rotations.of(0.41015625);
   private static final boolean kFrontRightSteerMotorInverted = true;
   private static final boolean kFrontRightEncoderInverted = false;
 
@@ -177,7 +177,7 @@ public class TunerConstants {
   private static final int kBackRightDriveMotorId = 2;
   private static final int kBackRightSteerMotorId = 3;
   private static final int kBackRightEncoderId = 1;
-  private static final Angle kBackRightEncoderOffset = Rotations.of(0.01708984375);
+  private static final Angle kBackRightEncoderOffset = Rotations.of(0.030029296875);
   private static final boolean kBackRightSteerMotorInverted = true;
   private static final boolean kBackRightEncoderInverted = false;
 
@@ -237,10 +237,10 @@ public class TunerConstants {
               kBackRightSteerMotorInverted,
               kBackRightEncoderInverted);
 
-  /**
-   * Creates a CommandSwerveDrivetrain instance. This should only be called once in your robot
-   * program.
-   */
+  // /**
+  //  * Creates a CommandSwerveDrivetrain instance.
+  //  * This should only be called once in your robot program.
+  //  */
   // public static CommandSwerveDrivetrain createDrivetrain() {
   //     return new CommandSwerveDrivetrain(
   //         DrivetrainConstants, FrontLeft, FrontRight, BackLeft, BackRight
