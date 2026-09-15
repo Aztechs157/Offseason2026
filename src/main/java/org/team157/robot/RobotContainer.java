@@ -124,6 +124,8 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     intake.setIO(new IntakeIOSparkMax(intake));
+    intake.setDefaultCommand(intake.getDefault());
+    controller.rightTrigger().whileTrue(intake.set(1));
   }
 
   /**

@@ -29,12 +29,11 @@ public class Intake extends SubsystemBase {
   }
 
   /**
-   * Sets the default command of the Intake, stopping motor output when no other commands are
-   * running.
+   * Sets the default command of the hood, stopping motor output when no other commands are running.
    *
-   * @return Command setting the duty cycle output of the Intake's motor to 0
+   * @return Command setting the duty cycle output of the hood's motor to 0
    */
-  public Command setDefault() {
+  public Command getDefault() {
     return io.stop();
   }
 

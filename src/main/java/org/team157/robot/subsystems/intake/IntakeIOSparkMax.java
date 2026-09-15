@@ -40,7 +40,7 @@ public class IntakeIOSparkMax implements IntakeIO {
             .withIdleMode(MotorMode.COAST)
             // TODO: make intake constants and put real values in here
             //   .withStatorCurrentLimit(IntakeConstants.CURRENT_LIMIT)
-            //   .withGearing(IntakeConstants.GEARING)
+            .withGearing(IntakeConstants.GEARING)
             .withFollowers(Pair.of(followerTalonfx, false));
 
     SmartMotorController smartRollerMotor =
