@@ -125,6 +125,8 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     hopper.setIO(new HopperIOSparkMax(hopper));
+    hopper.setDefaultCommand(hopper.getDefault());
+    controller.rightTrigger().whileTrue(hopper.set(1));
   }
 
   /**
