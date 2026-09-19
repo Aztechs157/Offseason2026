@@ -124,7 +124,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-
+    controller.povUp().whileTrue(intake.setTargetPosition(1.0)); //filler value
     intake.setIO(new IntakeIOSparkMax(drive, 10));
   }
 
