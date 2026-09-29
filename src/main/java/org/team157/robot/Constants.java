@@ -7,6 +7,14 @@
 
 package org.team157.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+
+import org.team157.robot.parsing.PositionDetails;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -27,5 +35,20 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
+  }
+
+  public static class FieldConstants {
+    public static final Distance FIELD_LENGTH = Meters.of(16.54175);
+    public static final Distance FIELD_WIDTH = Meters.of(8.0137);
+    /** Manual reset position in blue alliance HP corner */
+    public static final Pose2d MANUAL_RESET_POSE_BLUE = new Pose2d(0.441, 0.441, new Rotation2d());
+    /** Manual reset position in red alliance HP corner */
+    public static final Pose2d MANUAL_RESET_POSE_RED =
+        new Pose2d(
+            FieldConstants.FIELD_LENGTH.in(Meters) - 0.441,
+            FieldConstants.FIELD_WIDTH.in(Meters) - 0.441,
+            new Rotation2d(Degrees.of(180)));
+
+    public static final PositionDetails positionDetails = new PositionDetails();
   }
 }

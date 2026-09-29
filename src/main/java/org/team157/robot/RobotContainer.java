@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.team157.robot.commands.DriveCommands;
@@ -25,6 +26,11 @@ import org.team157.robot.subsystems.drive.GyroIOPigeon2;
 import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
+import org.team157.robot.subsystems.vision.Vision;
+import org.team157.robot.subsystems.vision.VisionConstants;
+import org.team157.robot.subsystems.vision.VisionIO;
+import org.team157.robot.subsystems.vision.VisionIOPhotonVision;
+import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -34,13 +40,16 @@ import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  public static Vision vision;
+  public static Drive drive;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
+
+  public static boolean dumperMode = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -56,6 +65,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0),
+                new VisionIOPhotonVision(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -85,6 +101,13 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
         break;
 
       default:
@@ -96,6 +119,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {});
         break;
     }
 
@@ -136,6 +165,9 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+    // Update the pose estimation and turret tracking angle while no other vision commands are
+    // running.
+    vision.setDefaultCommand(vision.setDefault(drive));
 
     // Lock to 0° when A button is held
     controller
@@ -160,7 +192,27 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    //////////////////////////////////////////////
+    ///             DRIVER COMMANDS            ///
+    //////////////////////////////////////////////
+    // Face hub when Dumper Mode (toggled by operator LT + RT)
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger())
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive, () -> 0, () -> 0, vision::getDriveAngleToFaceHub));
   }
+
+    /**
+     * Returns the current state of Dumper Mode.
+     *
+     * @return a {@link Trigger} with the current state of Dumper Mode
+     */
+    private Trigger dumperModeTrigger() {
+        return new Trigger(() -> (dumperMode));
+    }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
