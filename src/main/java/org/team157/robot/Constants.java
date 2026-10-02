@@ -7,6 +7,7 @@
 
 package org.team157.robot;
 
+import com.ctre.phoenix6.CANBus;
 import edu.wpi.first.wpilibj.RobotBase;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
@@ -20,6 +21,8 @@ public final class Constants {
     public static final TelemetryVerbosity TELEMETRY_VERBOSITY = TelemetryVerbosity.LOW;
   }
 
+  public static final CANBus RIO_CAN_BUS = new CANBus("rio", "./logs/example.hoot");
+  public static final CANBus DRIVE_CAN_BUS = new CANBus("canivore", "./logs/example2.hoot");
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 

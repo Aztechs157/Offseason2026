@@ -27,6 +27,8 @@ import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOSparkMax;
+import org.team157.robot.subsystems.intake.Intake;
+import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -45,6 +47,7 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   public Hopper hopper = new Hopper();
+  public Intake intake = new Intake();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -127,6 +130,9 @@ public class RobotContainer {
     hopper.setIO(new HopperIOSparkMax(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
     controller.rightTrigger().whileTrue(hopper.set(1));
+    intake.setIO(new IntakeIOTalonFX(intake));
+    intake.setDefaultCommand(intake.getDefault());
+    controller.rightTrigger().whileTrue(intake.set(0.5));
   }
 
   /**
