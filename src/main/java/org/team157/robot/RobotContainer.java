@@ -26,7 +26,7 @@ import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.intake.Intake;
-import org.team157.robot.subsystems.intake.IntakeIOSparkMax;
+import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -123,9 +123,9 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-    intake.setIO(new IntakeIOSparkMax(intake));
+    intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
-    controller.rightTrigger().whileTrue(intake.set(1));
+    controller.rightTrigger().whileTrue(intake.set(0.5));
   }
 
   /**

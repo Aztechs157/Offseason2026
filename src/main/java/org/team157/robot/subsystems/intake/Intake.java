@@ -1,28 +1,27 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package org.team157.robot.subsystems.intake;
 
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
-/**
- * Represents the Intake subsystem, which feeds balls from the hopper up into the flywheel for
- * shooting.
- */
 public class Intake extends SubsystemBase {
 
-  // The IO interface for interacting with the Intake's motor.
   private IntakeIO io;
 
-  // Inputs from the motor and mechanism, to be updated periodically and logged.
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
   /** Creates a new Intake. */
   public Intake() {}
 
   /**
-   * Specifies the IO implementation to be used for the intake .
+   * Specifies the IO implementation to be used for the hood.
    *
-   * @param io An implementation of the intake 's IO layer, i.e. IntakeIOTalonFX
+   * @param io An implementation of the Hood's IO layer, i.e. HoodIOTalonFX
    */
   public void setIO(IntakeIO io) {
     this.io = io;
@@ -38,13 +37,31 @@ public class Intake extends SubsystemBase {
   }
 
   /**
-   * Set the duty cycle of the Intake roller motors.
+   * Set the duty cycle output of the intake motor. Primarily used for manual control
    *
-   * @param dutyCycle The power to be applied to the motors, between -1 and 1.
-   * @return {@link Command} setting the duty cycle of the Intake roller motors.
+   * @param dutycycle The power to be applied to the motor.
    */
-  public Command set(double dutyCycle) {
-    return io.set(dutyCycle);
+  public Command set(double dutycycle) {
+    return io.set(dutycycle);
+  }
+
+  /**
+   * Set the intake to a fixed target angular velocity.
+   *
+   * @param speed The target angular velocity.
+   * @return {@link Command} setting the intake to the specified velocity.
+   */
+  public Command setVelocity(AngularVelocity speed) {
+    return io.setVelocity(speed);
+  }
+
+  /**
+   * Run the intake at a set speed. Used for autonomous and button bindings.
+   *
+   * @return a {@link Command} running the intake motors at 100% duty cycle
+   */
+  public Command runIntake() {
+    return set(1);
   }
 
   @Override
