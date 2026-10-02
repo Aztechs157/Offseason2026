@@ -37,7 +37,7 @@ public class UptakeIOSparkMax implements UptakeIO {
             .withControlMode(ControlMode.OPEN_LOOP)
             .withTelemetry("UptakeRollerMotor", TelemetryConstants.TELEMETRY_VERBOSITY)
             .withMotorInverted(true)
-            .withIdleMode(MotorMode.COAST)
+            .withIdleMode(MotorMode.BRAKE)
             // TODO: make uptake constants and put real values in here
             //   .withStatorCurrentLimit(UptakeConstants.CURRENT_LIMIT)
             //   .withGearing(UptakeConstants.GEARING)
