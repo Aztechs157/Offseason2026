@@ -26,7 +26,7 @@ import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.hopper.Hopper;
-import org.team157.robot.subsystems.hopper.HopperIOSparkMax;
+import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
 import org.team157.robot.subsystems.intake.Intake;
 import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
 
@@ -127,7 +127,7 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-    hopper.setIO(new HopperIOSparkMax(hopper));
+    hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
     controller.rightTrigger().whileTrue(hopper.set(1));
     intake.setIO(new IntakeIOTalonFX(intake));
