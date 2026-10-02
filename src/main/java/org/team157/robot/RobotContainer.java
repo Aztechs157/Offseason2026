@@ -129,7 +129,7 @@ public class RobotContainer {
     configureButtonBindings();
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
-    controller.rightTrigger().whileTrue(hopper.set(1));
+    controller.leftTrigger().whileTrue(hopper.set(0.5));
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
     controller.rightTrigger().whileTrue(intake.set(0.5));
