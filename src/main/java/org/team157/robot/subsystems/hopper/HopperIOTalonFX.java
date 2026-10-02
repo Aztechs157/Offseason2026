@@ -31,7 +31,7 @@ public class HopperIOTalonFX implements HopperIO {
     SmartMotorControllerConfig hopperRollerMotorConfig =
         new SmartMotorControllerConfig(subsystem)
             .withControlMode(ControlMode.OPEN_LOOP)
-            .withMotorInverted(true)
+            .withMotorInverted(false)
             .withIdleMode(MotorMode.COAST)
             .withStatorCurrentLimit((HopperConstants.CURRENT_LIMIT))
             .withGearing(HopperConstants.GEARING);
