@@ -29,8 +29,8 @@ public class UptakeIOSparkMax implements UptakeIO {
 
   public UptakeIOSparkMax(SubsystemBase subsystem) {
     // TODO: id properly
-    SparkMax sparkmax = new SparkMax(157, MotorType.kBrushless);
-    SparkMax followerTalonfx = new SparkMax(158, MotorType.kBrushless);
+    SparkMax sparkMax = new SparkMax(157, MotorType.kBrushless);
+    SparkMax followerSparkMax = new SparkMax(158, MotorType.kBrushless);
 
     SmartMotorControllerConfig uptakeRollerMotorConfig =
         new SmartMotorControllerConfig(subsystem)
@@ -38,13 +38,13 @@ public class UptakeIOSparkMax implements UptakeIO {
             .withTelemetry("UptakeRollerMotor", TelemetryConstants.TELEMETRY_VERBOSITY)
             .withMotorInverted(true)
             .withIdleMode(MotorMode.COAST)
-         // TODO: make uptake constants and put real values in here
-         //   .withStatorCurrentLimit(UptakeConstants.CURRENT_LIMIT)
-         //   .withGearing(UptakeConstants.GEARING)
-            .withFollowers(Pair.of(followerTalonfx, false));
+            // TODO: make uptake constants and put real values in here
+            //   .withStatorCurrentLimit(UptakeConstants.CURRENT_LIMIT)
+            //   .withGearing(UptakeConstants.GEARING)
+            .withFollowers(Pair.of(followerSparkMax, true));
 
     SmartMotorController smartRollerMotor =
-        new SparkWrapper(sparkmax, DCMotor.getNEO(1), uptakeRollerMotorConfig);
+        new SparkWrapper(sparkMax, DCMotor.getNEO(1), uptakeRollerMotorConfig);
 
     FlyWheelConfig uptakeRollerConfig =
         new FlyWheelConfig(smartRollerMotor)
