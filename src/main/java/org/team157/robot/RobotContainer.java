@@ -29,6 +29,8 @@ import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
 import org.team157.robot.subsystems.intake.Intake;
 import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.uptake.Uptake;
+import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -48,6 +50,7 @@ public class RobotContainer {
 
   public Hopper hopper = new Hopper();
   public Intake intake = new Intake();
+  public Uptake uptake = new Uptake();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -133,6 +136,9 @@ public class RobotContainer {
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
     controller.rightTrigger().whileTrue(intake.set(0.5));
+    uptake.setIO(new UptakeIOSparkMax(uptake));
+    uptake.setDefaultCommand(uptake.getDefault());
+    controller.leftBumper().whileTrue(uptake.set(0.5));
   }
 
   /**
