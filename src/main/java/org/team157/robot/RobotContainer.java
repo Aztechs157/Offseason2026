@@ -7,6 +7,8 @@
 
 package org.team157.robot;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -49,8 +51,8 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-  public Flywheel flywheel = new Flywheel();
 
+  public Flywheel flywheel = new Flywheel();
   public Hopper hopper = new Hopper();
   public Intake intake = new Intake();
   public Uptake uptake = new Uptake();
@@ -133,19 +135,18 @@ public class RobotContainer {
 
     // Configure the button bindings
     configureButtonBindings();
-
-    flywheel.setIO(new FlywheelIOSparkflex(flywheel));
-    flywheel.setDefaultCommand(flywheel.getDefault());
-    controller.rightBumper().whileTrue(flywheel.set(0.25));
-    hopper.setIO(new HopperIOTalonFX(hopper));
-    hopper.setDefaultCommand(hopper.getDefault());
-    controller.leftTrigger().whileTrue(hopper.set(0.5));
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
     controller.rightTrigger().whileTrue(intake.set(0.5));
+    hopper.setIO(new HopperIOTalonFX(hopper));
+    hopper.setDefaultCommand(hopper.getDefault());
+    controller.leftTrigger().whileTrue(hopper.set(0.5));
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
-    controller.leftBumper().whileTrue(uptake.set(0.5));
+    controller.rightBumper().whileTrue(uptake.set(0.5));
+    flywheel.setIO(new FlywheelIOSparkflex(flywheel));
+    flywheel.setDefaultCommand(flywheel.getDefault());
+    controller.leftBumper().whileTrue(flywheel.setVelocity(RPM.of(1000)));
   }
 
   /**
