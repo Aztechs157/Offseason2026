@@ -30,7 +30,8 @@ public class UptakeIOSparkMax implements UptakeIO {
   public UptakeIOSparkMax(SubsystemBase subsystem) {
     // TODO: id properly
     SparkMax sparkMax = new SparkMax(UptakeConstants.MOTOR_ID, MotorType.kBrushless);
-    SparkMax followerSparkMax = new SparkMax(UptakeConstants.FOLLOWER_MOTOR_ID, MotorType.kBrushless);
+    SparkMax followerSparkMax =
+        new SparkMax(UptakeConstants.FOLLOWER_MOTOR_ID, MotorType.kBrushless);
 
     SmartMotorControllerConfig uptakeRollerMotorConfig =
         new SmartMotorControllerConfig(subsystem)
