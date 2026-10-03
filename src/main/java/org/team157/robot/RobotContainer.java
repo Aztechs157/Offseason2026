@@ -27,6 +27,12 @@ import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.flywheel.Flywheel;
 import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
+import org.team157.robot.subsystems.hopper.Hopper;
+import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
+import org.team157.robot.subsystems.intake.Intake;
+import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.uptake.Uptake;
+import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -44,6 +50,10 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   public Flywheel flywheel = new Flywheel();
+
+  public Hopper hopper = new Hopper();
+  public Intake intake = new Intake();
+  public Uptake uptake = new Uptake();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -127,6 +137,15 @@ public class RobotContainer {
     flywheel.setIO(new FlywheelIOSparkflex(flywheel));
     flywheel.setDefaultCommand(flywheel.getDefault());
     controller.rightBumper().whileTrue(flywheel.set(0.25));
+    hopper.setIO(new HopperIOTalonFX(hopper));
+    hopper.setDefaultCommand(hopper.getDefault());
+    controller.leftTrigger().whileTrue(hopper.set(0.5));
+    intake.setIO(new IntakeIOTalonFX(intake));
+    intake.setDefaultCommand(intake.getDefault());
+    controller.rightTrigger().whileTrue(intake.set(0.5));
+    uptake.setIO(new UptakeIOSparkMax(uptake));
+    uptake.setDefaultCommand(uptake.getDefault());
+    controller.leftBumper().whileTrue(uptake.set(0.5));
   }
 
   /**
