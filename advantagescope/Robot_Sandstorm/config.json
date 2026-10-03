@@ -9,10 +9,9 @@
   ],
   "cameras": [],
   "components": [],
-      "zeroedPosition": [
-        0,
-        0,
-        0
-      ]
-    }
-
+  "zeroedPosition": [
+    0,
+    0,
+    0
+  ]
+}

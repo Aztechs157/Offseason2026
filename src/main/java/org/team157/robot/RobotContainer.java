@@ -26,7 +26,7 @@ import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.flywheel.Flywheel;
-import org.team157.robot.subsystems.flywheel.FlywheelIOSparkmax;
+import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -124,7 +124,9 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-    flywheel.setIO(new FlywheelIOSparkmax(flywheel));
+    flywheel.setIO(new FlywheelIOSparkflex(flywheel));
+    flywheel.setDefaultCommand(flywheel.getDefault());
+    controller.rightBumper().whileTrue(flywheel.set(0.25));
   }
 
   /**

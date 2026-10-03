@@ -23,7 +23,10 @@ import yams.gearing.MechanismGearing;
 
 public final class FlywheelConstants {
   // IDs of both motors powering the flywheel.
-  public static final int MOTOR_ID = 22, FOLLOWER_MOTOR_ID = 23;
+  public static final int MOTOR_ID_RIGHT = 51,
+      FOLLOWER_MOTOR_ID_RIGHT = 52,
+      FOLLOWER_MOTOR_ID_LEFT_1 = 56,
+      FOLLOWER_MOTOR_ID_LEFT_2 = 57;
   // Closed-loop control values for the flywheel.
   public static final double KP = 2, KI = 0, KD = 0;
   public static final double KS = 0.0, KV = 0.0, KA = 0.0;
@@ -36,11 +39,11 @@ public final class FlywheelConstants {
   public static final AngularAcceleration ANGULAR_ACCELERATION =
       RotationsPerSecondPerSecond.of(11600);
   // Gear ratio between the motor and the flywheel.
-  public static final MechanismGearing GEARING = new MechanismGearing(GearBox.fromStages("17:17"));
+  public static final MechanismGearing GEARING = new MechanismGearing(GearBox.fromStages("32:22"));
   // Diameter of the flywheel, in meters.
-  public static final Distance FLYWHEEL_DIAMETER = Inches.of(4);
+  public static final Distance FLYWHEEL_DIAMETER = Inches.of(6);
   // Mass of the flywheel (including shooter wheels), in pounds.
-  public static final Mass FLYWHEEL_MASS = Pounds.of(2);
+  public static final Mass FLYWHEEL_MASS = Pounds.of(1);
   // Z distance from the center of the flywheel to the ground, in meters.
   public static final Distance HEIGHT = Meters.of(0.523);
 

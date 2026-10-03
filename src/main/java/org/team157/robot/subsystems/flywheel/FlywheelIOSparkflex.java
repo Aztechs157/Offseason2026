@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.Pair;
@@ -23,19 +24,24 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class FlywheelIOSparkmax implements FlywheelIO {
+public class FlywheelIOSparkflex implements FlywheelIO {
 
   private final FlyWheel flywheel;
   private final SmartMotorController motor;
   // motor object for sysID voltage control
-  private final SparkMax sparkMax;
+  private final SparkFlex sparkFlex;
   // initial voltage for sysID voltage control
   private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
-  public FlywheelIOSparkmax(SubsystemBase subsystem) {
+  public FlywheelIOSparkflex(SubsystemBase subsystem) {
     // TODO: actual ids here
-    this.sparkMax = new SparkMax(500, MotorType.kBrushless);
-    SparkMax followerSparkMax = new SparkMax(501, MotorType.kBrushless);
+    this.sparkFlex = new SparkFlex(FlywheelConstants.MOTOR_ID_RIGHT, MotorType.kBrushless);
+    SparkMax followerSparkMax_RIGHT =
+        new SparkMax(FlywheelConstants.FOLLOWER_MOTOR_ID_RIGHT, MotorType.kBrushless);
+    SparkMax followerSparkMax_LEFT_1 =
+        new SparkMax(FlywheelConstants.FOLLOWER_MOTOR_ID_LEFT_1, MotorType.kBrushless);
+    SparkMax followerSparkMax_LEFT_2 =
+        new SparkMax(FlywheelConstants.FOLLOWER_MOTOR_ID_LEFT_2, MotorType.kBrushless);
 
     SmartMotorControllerConfig flywheelMotorConfig =
         new SmartMotorControllerConfig(subsystem)
@@ -63,10 +69,13 @@ public class FlywheelIOSparkmax implements FlywheelIO {
             .withIdleMode(MotorMode.COAST)
             .withStatorCurrentLimit(FlywheelConstants.CURRENT_LIMIT)
             .withClosedLoopRampRate(FlywheelConstants.RAMP_RATE)
-            .withFollowers(Pair.of(followerSparkMax, true));
+            .withFollowers(
+                Pair.of(followerSparkMax_RIGHT, false),
+                Pair.of(followerSparkMax_LEFT_1, true),
+                Pair.of(followerSparkMax_LEFT_2, true));
 
     SmartMotorController smartMotor =
-        new SparkWrapper(sparkMax, DCMotor.getNEO(1), flywheelMotorConfig);
+        new SparkWrapper(sparkFlex, DCMotor.getNEO(1), flywheelMotorConfig);
 
     FlyWheelConfig flywheelConfig =
         new FlyWheelConfig(smartMotor)
