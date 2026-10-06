@@ -14,11 +14,18 @@ public interface IntakeIO {
     public double targetPositionMeters = 0.0;
   }
 
+  /**
+   * Updates the inputs to be logged by AdvantageKit.
+   *
+   * @param inputs The set of inputs to be logged, including information on the motor, encoder,
+   *     and mechanism.
+   */
   default void updateInputs(IntakeIOInputs inputs) {}
 
   default void setTargetPosition(double meters) {}
 
   default void stop() {}
 
+  /** Updates the values for the simulated version of the intake deployment mechanism. */
   default void simIterate() {}
 }

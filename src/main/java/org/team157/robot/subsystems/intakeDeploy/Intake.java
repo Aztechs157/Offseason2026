@@ -4,6 +4,7 @@
 
 package org.team157.robot.subsystems.intakeDeploy;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -17,6 +18,10 @@ public class Intake extends SubsystemBase {
 
   public void setIO(IntakeIO io) {
     this.io = io;
+  }
+
+  public Command setTargetPosition(double meters) {
+    return runOnce(() -> io.setTargetPosition(meters));
   }
 
   /** Creates a new Intake. */
