@@ -11,12 +11,10 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkFlex;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import yams.gearing.GearBox;
-import yams.gearing.MechanismGearing;
 import yams.mechanisms.config.ElevatorConfig;
 import yams.mechanisms.positional.Elevator;
 import yams.motorcontrollers.SmartMotorController;
@@ -24,25 +22,25 @@ import yams.motorcontrollers.SmartMotorControllerConfig;
 import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 import yams.motorcontrollers.local.SparkWrapper;
 
-public class IntakeIOSparkMax implements IntakeIO {
+public class IntakeIOSparkFlex implements IntakeIO {
 
   private final Elevator intake;
   private final SmartMotorController motor;
 
-  public IntakeIOSparkMax(SubsystemBase subsystem, int canId) {
-    SparkMax sparkmax = new SparkMax(canId, MotorType.kBrushless);
+  public IntakeIOSparkFlex(SubsystemBase subsystem, int canId) {
+    SparkFlex sparkFlex = new SparkFlex(canId, MotorType.kBrushless);
 
     // Step 1: Create SmartMotorControllerConfig
     SmartMotorControllerConfig smcConfig =
         new SmartMotorControllerConfig(subsystem)
-            .withGearing(new MechanismGearing(GearBox.fromStages("5:1")))
+            .withGearing(IntakeConstants.RACK_GEARING)
             .withMechanismCircumference(Inches.of(19.6)) // sprocket circumference
-            .withClosedLoopController(10, 0, 0.5)
-            .withFeedforward(new ElevatorFeedforward(0.1, 0.2, 0.5, 0.01))
-            .withTrapezoidalProfile(MetersPerSecond.of(1.0), MetersPerSecondPerSecond.of(2.0));
+            .withClosedLoopController(IntakeConstants.KP, IntakeConstants.KI, IntakeConstants.KD);
+            // .withFeedforward(new ElevatorFeedforward(IntakeConstants.KS, IntakeConstants.KV, IntakeConstants.KA))
+            // .withTrapezoidalProfile(MetersPerSecond.of(1.0), MetersPerSecondPerSecond.of(2.0));
 
     // Step 2: Create SmartMotorController (TalonFXWrapper)
-    SmartMotorController smc = new SparkWrapper(sparkmax, DCMotor.getNEO(1), smcConfig);
+    SmartMotorController smc = new SparkWrapper(sparkFlex, DCMotor.getNEO(1), smcConfig);
 
     // Step 3: Create IntakeConfig with the SmartMotorController
     ElevatorConfig intakeConfig =
@@ -52,7 +50,7 @@ public class IntakeIOSparkMax implements IntakeIO {
             .withHardLimits(Meters.of(0), Meters.of(1.5)) // Physical hard stops for sim
             .withSoftLimits(Meters.of(0.02), Meters.of(1.2))
             .withStartingHeight(Meters.of(0))
-            .withAngle(Degrees.of(0)) // Vertical elevator
+            .withAngle(Degrees.of(31.7)) // Vertical elevator
             .withTelemetry("Intake", TelemetryVerbosity.HIGH);
 
     // Step 4: Create Intake mechanism - handles simulation automatically!

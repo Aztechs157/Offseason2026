@@ -17,8 +17,8 @@ public interface IntakeIO {
   /**
    * Updates the inputs to be logged by AdvantageKit.
    *
-   * @param inputs The set of inputs to be logged, including information on the motor, encoder,
-   *     and mechanism.
+   * @param inputs The set of inputs to be logged, including information on the motor, encoder, and
+   *     mechanism.
    */
   default void updateInputs(IntakeIOInputs inputs) {}
 
