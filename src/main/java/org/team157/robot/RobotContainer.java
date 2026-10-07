@@ -7,6 +7,7 @@
 
 package org.team157.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -33,6 +34,8 @@ import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
 import org.team157.robot.subsystems.intake.Intake;
 import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
 import org.team157.robot.subsystems.uptake.Uptake;
 import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 
@@ -56,6 +59,7 @@ public class RobotContainer {
   public Hopper hopper = new Hopper();
   public Intake intake = new Intake();
   public Uptake uptake = new Uptake();
+  public IntakeDeploy intakeDeploy = new IntakeDeploy();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -138,6 +142,9 @@ public class RobotContainer {
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
     controller.rightTrigger().whileTrue(intake.set(0.5));
+    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
+    controller.y().toggleOnTrue(intakeDeploy.setAngleThenStop(Degrees.of(80)));
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
     controller.leftTrigger().whileTrue(hopper.set(0.5));
