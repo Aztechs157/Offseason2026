@@ -1,94 +1,100 @@
 package org.team157.robot.subsystems.intakeDeploy;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Seconds;
 
-import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
-import org.team157.utilities.PosUtils;
 
 /**
- * Represents the Slapdown subsystem, pivots the intake up and down to collect/agitate balls and
- * expand hopper capacity.
+ * Represents the Intake Deploy subsystem, a rack and pinion that moves the intake from inside the
+ * robot out past the frame perimeter to pick up balls, and wiggles it to agitate balls toward the
+ * hopper and uptake.
  */
 public class IntakeDeploy extends SubsystemBase {
 
-  // The IO interface for interacting with the hood's motor.
+  // The IO interface for interacting with the rack's motor and potentiometer.
   private IntakeDeployIO io;
 
-  // Inputs from the motor, encoder, and mechanism, to be updated periodically and logged.
-  private final SlapdownIOInputsAutoLogged inputs = new SlapdownIOInputsAutoLogged();
+  // Inputs from the motor, potentiometer, and mechanism, to be updated periodically and logged.
+  private final IntakeDeployIOInputsAutoLogged inputs = new IntakeDeployIOInputsAutoLogged();
 
-  /** Creates a new Slapdown. */
+  /** Creates a new IntakeDeploy. */
   public IntakeDeploy() {}
 
   /**
-   * Specifies the IO implementation to be used for the Slapdown.
+   * Specifies the IO implementation to be used for the IntakeDeploy.
    *
-   * @param io An implementation of the Slapdown's IO layer, i.e. SlapdownIOTalonFX
+   * @param io An implementation of the IntakeDeploy's IO layer, i.e. IntakeDeployIOSparkFlex
    */
   public void setIO(IntakeDeployIO io) {
     this.io = io;
   }
 
   /**
-   * Set the target angle of the slapdown.
+   * Moves the rack to a position, giving up after a timeout so a jam can't stall the motor.
    *
-   * @param angle Angle to go to.
+   * @param position Rack position to go to.
+   * @param timeoutSeconds Maximum time to try to reach the position.
    */
-  public Command setAngle(Angle angle) {
-    return io.setTargetAngle(angle).finallyDo(() -> io.stop());
+  private Command moveTo(Distance position, double timeoutSeconds) {
+    return io.runTo(position, IntakeDeployConstants.POSITION_TOLERANCE).withTimeout(timeoutSeconds);
   }
 
   /**
-   * Set the target angle of the slapdown, and stop once the pivot is oscillating about its
-   * setpoint.
+   * Deploys the intake out of the robot to its intaking position near the floor.
    *
-   * @param angle Angle to go to.
+   * @return a {@link Command} moving the rack to the deployed position.
    */
-  public Command setAngleThenStop(Angle angle) {
-    return setAngle(angle)
-        .until(() -> PosUtils.isOscillating(angle.in(Degrees), inputs.angleDegrees, 2.0, 0.0, 1.0));
+  public Command deploy() {
+    return moveTo(
+            IntakeDeployConstants.DEPLOYED_POSITION, IntakeDeployConstants.MOVE_TIMEOUT.in(Seconds))
+        .withName("IntakeDeploy Deploy");
   }
 
   /**
-   * Deploys the slapdown intake.
+   * Retracts the intake back into its starting position inside the robot.
    *
-   * @return a {@link Command} setting the slapdown's target angle to 0°.
+   * @return a {@link Command} moving the rack to the retracted position.
    */
-  public Command deployIntake() {
-    return setAngleThenStop(Degrees.of(0));
-  }
-
-  public Command deployIntakeAndHold() {
-    return setAngle(
-        Degrees.of(0)); // TODO: confirm weither we still need the hold current and/or/also
-    // consider
-    // setting the angle to a negative to constantly press intake down and have pid at
-    // the same time
+  public Command retract() {
+    return moveTo(
+            IntakeDeployConstants.RETRACTED_POSITION,
+            IntakeDeployConstants.MOVE_TIMEOUT.in(Seconds))
+        .withName("IntakeDeploy Retract");
   }
 
   /**
-   * Retracts the slapdown intake.
+   * Repeatedly moves the intake partway in and back out to agitate balls toward the hopper and
+   * uptake. Runs until interrupted, intended to be bound with whileTrue. Each move has a short
+   * timeout so a full hopper blocking the intake doesn't stop the wiggle.
    *
-   * @return a {@link Command} setting the slapdown's target angle to 78°.
+   * @return a {@link Command} moving the rack between the wiggle and deployed positions.
    */
-  public Command retractIntake() {
-    return setAngleThenStop(Degrees.of(78));
+  public Command wiggle() {
+    double wiggleMoveTimeout = IntakeDeployConstants.WIGGLE_MOVE_TIMEOUT.in(Seconds);
+    return Commands.sequence(
+            moveTo(IntakeDeployConstants.WIGGLE_IN_POSITION, wiggleMoveTimeout),
+            moveTo(IntakeDeployConstants.DEPLOYED_POSITION, wiggleMoveTimeout))
+        .repeatedly()
+        .withName("IntakeDeploy Wiggle");
   }
 
   /**
-   * Quickly moves the slapdown up and down to agitate fuel.
+   * Resets the motor encoder to the potentiometer's position. Useful if the rack slipped teeth.
    *
-   * @return a {@link Command} setting the slapdown's target angle to 40°, then back down to 0°.
+   * @return a {@link Command} reseeding the encoder from the potentiometer.
    */
-  public Command wiggleIntake() {
-    return setAngleThenStop(Degrees.of(50)).andThen(setAngleThenStop(Degrees.of(0)));
+  public Command seedEncoderFromPot() {
+    return Commands.runOnce(() -> io.seedEncoderFromPot()).ignoringDisable(true);
   }
 
   /**
-   * Set the duty cycle output of the slapdown motor. Primarily used for manual control
+   * Set the duty cycle output of the rack motor. Primarily used for manual control
    *
    * @param dutycycle The power to be applied to the motor.
    */
@@ -96,8 +102,19 @@ public class IntakeDeploy extends SubsystemBase {
     return io.set(dutycycle);
   }
 
+  /**
+   * Sets the default command of the intake deploy, stopping motor output when no other commands are
+   * running. The motor is in brake mode, so the rack stays where it was left.
+   *
+   * @return Command setting the duty cycle output of the rack's motor to 0
+   */
   public Command getDefault() {
-    return io.set(0);
+    return io.stop();
+  }
+
+  /** Gets the rack position, used for posing the intake in the Mechanism3D. */
+  public Distance getPosition() {
+    return Inches.of(inputs.positionInches);
   }
 
   @Override
@@ -105,17 +122,19 @@ public class IntakeDeploy extends SubsystemBase {
     // This method will be called once per scheduler run
     // Updates the inputs to be logged by AdvantageKit and writes them to the Logger
     io.updateInputs(inputs);
-    Logger.processInputs("Slapdown", inputs);
+    Logger.processInputs("IntakeDeploy", inputs);
+
+    // While disabled the rack can be moved by hand, so keep the encoder in sync with the pot.
+    if (DriverStation.isDisabled()
+        && Math.abs(inputs.potPositionInches - inputs.positionInches)
+            > IntakeDeployConstants.ENCODER_RESYNC_THRESHOLD.in(Inches)) {
+      io.seedEncoderFromPot();
+    }
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation.
     io.simIterate();
-  }
-
-  /** Gets the angle of the pivot to pose the slapdown and hopper walls in the Mechanism3D */
-  public Angle getSlapdownAngle() {
-    return Radians.of(inputs.angleFromEncoderDegrees);
   }
 }

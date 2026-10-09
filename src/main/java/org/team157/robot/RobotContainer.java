@@ -7,7 +7,6 @@
 
 package org.team157.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.RPM;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -144,7 +143,14 @@ public class RobotContainer {
     controller.rightTrigger().whileTrue(intake.set(0.5));
     intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
     intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
-    controller.y().toggleOnTrue(intakeDeploy.setAngleThenStop(Degrees.of(80)));
+    // TODO: temporary direction check, hold Y and the intake should move out and
+    // IntakeDeploy/PositionInches should increase. Hold d-pad left to bring it back in.
+    controller.y().whileTrue(intakeDeploy.set(0.25));
+    controller.povLeft().whileTrue(intakeDeploy.set(-0.25));
+    controller.povDown().onTrue(intakeDeploy.deploy());
+    controller.povUp().onTrue(intakeDeploy.retract());
+    // Wiggle while held, then go back out to keep intaking
+    controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
     controller.leftTrigger().whileTrue(hopper.set(0.5));

@@ -1,9 +1,8 @@
 package org.team157.robot.subsystems.intakeDeploy;
 
-import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.AutoLog;
 
 /**
@@ -17,18 +16,21 @@ public interface IntakeDeployIO {
    * implementation of the {@link IntakeDeployIO} interface.
    */
   @AutoLog
-  public static class SlapdownIOInputs {
+  public static class IntakeDeployIOInputs {
     public double supplyCurrentAmps = 0.0;
     public double statorCurrentAmps = 0.0;
     public double appliedVolts = 0.0;
     public double temperatureCelsius = 0.0;
-    public double targetAngleDegrees = 0.0;
-    public double angleDegrees = 0.0;
-    public double encoderPositionRotations = 0.0;
-    public double scaledEncoderPosition = 0.0;
-    public double angleFromEncoderDegrees = 0.0;
-    public double mechanismVelocityDegreesPerSecond = 0.0;
-    public boolean isInStartingPosition = false;
+    /** Rack position according to the motor's encoder, used for closed loop control */
+    public double positionInches = 0.0;
+    /** Rack position setpoint of the closed loop controller */
+    public double targetPositionInches = 0.0;
+
+    public double velocityInchesPerSecond = 0.0;
+    /** Raw potentiometer reading, 0 to 1 (fraction of 5V) */
+    public double potRaw = 0.0;
+    /** Rack position according to the potentiometer */
+    public double potPositionInches = 0.0;
   }
 
   /**
@@ -37,33 +39,31 @@ public interface IntakeDeployIO {
    * @param inputs The set of inputs to be logged, including information on the motor, encoder, and
    *     mechanism.
    */
-  default void updateInputs(SlapdownIOInputs inputs) {}
+  default void updateInputs(IntakeDeployIOInputs inputs) {}
 
-  /** Updates the values for the simulated version of the slapdown mechanism. */
+  /** Updates the values for the simulated version of the intake deploy mechanism. */
   default void simIterate() {}
 
   /**
-   * Sets the target angle of the slapdown mechanism.
-   *
-   * @param angle Angle to go to
-   * @return a {@link Command} setting the target angle of the slapdown to the specified angle.
+   * Resets the motor's encoder to the position read by the potentiometer. Does nothing in
+   * simulation, where there is no potentiometer.
    */
-  default Command setTargetAngle(Angle angle) {
+  default void seedEncoderFromPot() {}
+
+  /**
+   * Moves the rack to a position, ending once it is within tolerance. The motor keeps holding the
+   * position after the command ends until another command takes over.
+   *
+   * @param position Rack position to go to
+   * @param tolerance How close the rack must get for the command to end
+   * @return a {@link Command} moving the rack to the specified position.
+   */
+  default Command runTo(Distance position, Distance tolerance) {
     return Commands.none();
   }
 
   /**
-   * Sets the target angle of the slapdown mechanism, using a Angle Supplier.
-   *
-   * @param angle Angle to go to
-   * @return a {@link Command} setting the target angle of the slapdown to the specified angle.
-   */
-  default Command setTargetAngle(Supplier<Angle> angle) {
-    return Commands.none();
-  }
-
-  /**
-   * Stops the slapdown pivot.
+   * Stops the rack.
    *
    * @return a {@link Command} setting the motor's output power to 0.
    */
@@ -72,7 +72,7 @@ public interface IntakeDeployIO {
   }
 
   /**
-   * Directly sets the output power of the slapdown's motor
+   * Directly sets the output power of the rack's motor
    *
    * @param dutycycle Power to be applied to the motor, from 1 to -1.
    * @return a {@link Command} applying the specified power to the motor.
