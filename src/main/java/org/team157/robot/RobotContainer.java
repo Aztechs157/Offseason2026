@@ -30,6 +30,7 @@ import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.flywheel.Flywheel;
 import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
 import org.team157.robot.subsystems.hood.Hood;
+import org.team157.robot.subsystems.hood.HoodConstants;
 import org.team157.robot.subsystems.hood.HoodIOSparkMax;
 import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
@@ -139,6 +140,14 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     hood.setIO(new HoodIOSparkMax(hood));
+    hood.setDefaultCommand(hood.getDefault());
+    // TODO: temporary direction check, hold Start and the hood angle should increase
+    // (Hood/AngleDegrees goes up). Hold Back to lower it.
+    controller.start().whileTrue(hood.set(0.05));
+    controller.back().whileTrue(hood.set(-0.05));
+    // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
+    controller.leftStick().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
+    controller.rightStick().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
     controller.rightTrigger().whileTrue(intake.set(0.5));

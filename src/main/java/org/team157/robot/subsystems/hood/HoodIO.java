@@ -23,10 +23,15 @@ public interface HoodIO {
     public double appliedVolts = 0.0;
     public double temperatureCelsius = 0.0;
     public double targetAngleDegrees = 0.0;
+    /** Hood angle according to the motor's encoder, used for closed loop control */
     public double angleDegrees = 0.0;
+    /** Raw absolute encoder reading, 0 to 1 rotations */
     public double encoderPositionRotations = 0.0;
-    public double scaledEncoderPosition = 0.0;
+    /** Whether the absolute encoder is plugged in and sending a signal */
+    public boolean encoderConnected = false;
+    /** Hood angle according to the absolute encoder */
     public double angleFromEncoderDegrees = 0.0;
+
     public double mechanismVelocityDegreesPerSecond = 0.0;
   }
 
@@ -40,6 +45,12 @@ public interface HoodIO {
 
   /** Updates the values for the simulated version of the hood mechanism. */
   default void simIterate() {}
+
+  /**
+   * Resets the motor's encoder to the angle read by the absolute encoder. Does nothing in
+   * simulation, where there is no absolute encoder.
+   */
+  default void seedEncoder() {}
 
   /**
    * Sets the target angle of the hood mechanism.

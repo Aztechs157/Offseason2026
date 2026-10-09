@@ -4,8 +4,12 @@
 
 package org.team157.robot.subsystems.hood;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -41,9 +45,23 @@ public class Hood extends SubsystemBase {
 
   /**
    * Sets the default command of the hood, stopping motor output when no other commands are running.
+   * The motor is in brake mode, so the hood stays where it was left.
    *
    * @return Command setting the duty cycle output of the hood's motor to 0
    */
+  public Command getDefault() {
+    return io.stop();
+  }
+
+  /**
+   * Resets the motor encoder to the absolute encoder's angle.
+   *
+   * @return a {@link Command} reseeding the motor encoder from the absolute encoder.
+   */
+  public Command seedEncoder() {
+    return Commands.runOnce(() -> io.seedEncoder()).ignoringDisable(true);
+  }
+
   //   TODO: re impliment when have needed subsystems set up
   //   public Command getDefault(DriveSystem drivetrain) {
   //     return io.setTargetAngle(HoodConstants.UPPER_SOFT_LIMIT);
@@ -110,6 +128,13 @@ public class Hood extends SubsystemBase {
     // Updates the inputs to be logged by AdvantageKit and writes them to the Logger
     io.updateInputs(inputs);
     Logger.processInputs("Hood", inputs);
+
+    // While disabled the hood can be moved by hand, so keep the motor encoder in sync.
+    if (DriverStation.isDisabled()
+        && Math.abs(inputs.angleFromEncoderDegrees - inputs.angleDegrees)
+            > HoodConstants.ENCODER_RESYNC_THRESHOLD.in(Degrees)) {
+      io.seedEncoder();
+    }
   }
 
   @Override

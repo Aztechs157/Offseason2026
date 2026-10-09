@@ -13,10 +13,11 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
-import org.team157.robot.subsystems.hood.HoodIO.HoodIOInputs;
+import org.team157.robot.Constants.TelemetryConstants;
 import org.team157.utilities.PosUtils;
 import yams.mechanisms.config.PivotConfig;
 import yams.mechanisms.positional.Pivot;
@@ -26,32 +27,34 @@ import yams.motorcontrollers.SmartMotorControllerConfig.ControlMode;
 import yams.motorcontrollers.SmartMotorControllerConfig.MotorMode;
 import yams.motorcontrollers.local.SparkWrapper;
 
+/**
+ * Hood running on a SPARK MAX, with a REV Through Bore absolute encoder on a roboRIO DIO port.
+ *
+ * <p>YAMS's SparkWrapper can only use a SPARK absolute encoder for external feedback, so the
+ * roboRIO encoder is not used for closed loop control directly. Instead the motor's built-in
+ * encoder runs the closed loop and is seeded from the absolute encoder's angle.
+ */
 public class HoodIOSparkMax implements HoodIO {
 
   private final Pivot hood;
   private final SmartMotorController motor;
-  private final DutyCycleEncoder encoder;
+  // Returns 0 to 1 rotations
+  private final DutyCycleEncoder encoder =
+      new DutyCycleEncoder(HoodConstants.ENCODER_ID, 1.0, HoodConstants.ENCODER_ZERO_OFFSET);
 
   public HoodIOSparkMax(SubsystemBase subsystem) {
-    this.encoder = new DutyCycleEncoder(HoodConstants.ENCODER_ID);
-    SparkMax sparkmax = new SparkMax(157, MotorType.kBrushless);
+    SparkMax sparkmax = new SparkMax(HoodConstants.MOTOR_ID, MotorType.kBrushless);
 
     SmartMotorControllerConfig hoodMotorConfig =
         new SmartMotorControllerConfig(subsystem)
             .withControlMode(ControlMode.CLOSED_LOOP)
-            .withClosedLoopController(
-                HoodConstants.KP,
-                HoodConstants.KI,
-                HoodConstants.KD,
-                HoodConstants.ANGULAR_VELOCITY,
-                HoodConstants.ANGULAR_ACCELERATION)
+            .withTelemetry("HoodMotor", TelemetryConstants.TELEMETRY_VERBOSITY)
+            .withClosedLoopController(HoodConstants.KP, HoodConstants.KI, HoodConstants.KD)
             .withSimClosedLoopController(
-                HoodConstants.SIM_KP,
-                HoodConstants.SIM_KI,
-                HoodConstants.SIM_KD,
-                HoodConstants.ANGULAR_VELOCITY,
-                HoodConstants.ANGULAR_ACCELERATION)
+                HoodConstants.SIM_KP, HoodConstants.SIM_KI, HoodConstants.SIM_KD)
+            .withTrapezoidalProfile(HoodConstants.MAX_VELOCITY, HoodConstants.MAX_ACCELERATION)
             .withIdleMode(MotorMode.BRAKE)
+            // TODO: verify positive output raises the hood angle
             .withMotorInverted(false)
             .withGearing(HoodConstants.GEARING)
             .withSoftLimit(HoodConstants.LOWER_SOFT_LIMIT, HoodConstants.UPPER_SOFT_LIMIT)
@@ -65,33 +68,30 @@ public class HoodIOSparkMax implements HoodIO {
     // Configure the physical characteristics of the hood.
     PivotConfig hoodConfig =
         new PivotConfig(smartHoodMotor)
-            .withStartingPosition(
-                Degrees.of(mapHoodEncoder(HoodConstants.MIN_ANGLE, HoodConstants.MAX_ANGLE)))
+            .withTelemetry("Hood", TelemetryConstants.TELEMETRY_VERBOSITY)
+            .withStartingPosition(HoodConstants.UPPER_SOFT_LIMIT)
             .withHardLimit(HoodConstants.LOWER_HARD_LIMIT, HoodConstants.UPPER_HARD_LIMIT)
             .withMOI(Meters.of(0.2), Kilograms.of(0.5));
 
     // Create the hood pivot system with the above configuration.
     this.hood = new Pivot(hoodConfig);
     this.motor = hood.getMotor();
+
+    seedEncoder();
   }
 
   /**
-   * Helper function that maps the hood's current encoder value to a given range using PosUtils.
-   *
-   * @param min The minimum value of the remapped range (equivalent to the hood's minimum encoder
-   *     position)
-   * @param max The maximum value of the remapped range (equivalent to hood's maximum encoder
-   *     position)
-   * @return The current value of the hood's encoder, mapped between 2 numbers based on the
-   *     configured minimum and maximum encoder values.
+   * Converts the absolute encoder's raw reading to a hood angle using the readings measured at each
+   * hard stop.
    */
-  private double mapHoodEncoder(double min, double max) {
-    return PosUtils.mapRange(
-        encoder.get(),
-        HoodConstants.MIN_ENCODER_POSITION,
-        HoodConstants.MAX_ENCODER_POSITION,
-        min,
-        max);
+  private Angle getEncoderAngle() {
+    return Degrees.of(
+        PosUtils.mapRange(
+            encoder.get(),
+            HoodConstants.ENCODER_AT_LOWER_HARD_LIMIT,
+            HoodConstants.ENCODER_AT_UPPER_HARD_LIMIT,
+            HoodConstants.LOWER_HARD_LIMIT.in(Degrees),
+            HoodConstants.UPPER_HARD_LIMIT.in(Degrees)));
   }
 
   @Override
@@ -104,20 +104,27 @@ public class HoodIOSparkMax implements HoodIO {
     inputs.targetAngleDegrees =
         motor.getMechanismPositionSetpoint().map(a -> a.in(Degrees)).orElse(0.0);
     inputs.encoderPositionRotations = encoder.get();
-    inputs.angleFromEncoderDegrees =
-        mapHoodEncoder(HoodConstants.MIN_ANGLE, HoodConstants.MAX_ANGLE);
+    inputs.encoderConnected = encoder.isConnected();
+    inputs.angleFromEncoderDegrees = getEncoderAngle().in(Degrees);
     inputs.mechanismVelocityDegreesPerSecond = motor.getMechanismVelocity().in(DegreesPerSecond);
-    inputs.scaledEncoderPosition = mapHoodEncoder(0, 1);
+  }
+
+  @Override
+  public void seedEncoder() {
+    // An unplugged DutyCycleEncoder reads 0, which would seed a wrong angle
+    if (RobotBase.isReal() && encoder.isConnected()) {
+      motor.setEncoderPosition(getEncoderAngle());
+    }
   }
 
   @Override
   public Command setTargetAngle(Angle angle) {
-    return hood.setAngle(angle).finallyDo(() -> stop());
+    return hood.setAngle(angle);
   }
 
   @Override
   public Command setTargetAngle(Supplier<Angle> angle) {
-    return hood.setAngle(angle).finallyDo(() -> stop());
+    return hood.setAngle(angle);
   }
 
   @Override
