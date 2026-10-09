@@ -11,7 +11,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
-import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.team157.robot.Constants.TelemetryConstants;
@@ -28,9 +27,9 @@ import yams.motorcontrollers.local.SparkWrapper;
  * Rack and pinion intake deploy, modeled in YAMS as an {@link Elevator} so positions are linear
  * distances of rack travel.
  *
- * <p>YAMS's SparkWrapper can only use a SPARK absolute encoder for external feedback, so the
- * potentiometer (on the roboRIO) is not used for closed loop control directly. Instead the motor's
- * built-in encoder runs the closed loop and is seeded from the potentiometer's absolute position.
+ * <p>The motor's built-in encoder runs the closed loop. It is relative, so it is zeroed at startup
+ * and the rack must be fully retracted when the robot code starts (or re-zeroed with {@link
+ * #zeroEncoder()}). The potentiometer is only logged for now, since it wasn't reading correctly.
  */
 public class IntakeDeployIOSparkFlex implements IntakeDeployIO {
   private final Elevator rack;
@@ -61,10 +60,10 @@ public class IntakeDeployIOSparkFlex implements IntakeDeployIO {
             .withSoftLimit(
                 IntakeDeployConstants.LOWER_SOFT_LIMIT, IntakeDeployConstants.UPPER_SOFT_LIMIT)
             .withIdleMode(MotorMode.BRAKE)
-            // Raw negative output deploys (checked in REV Hardware Client), so invert to make
-            // positive output and positive positions mean deploying outward
-
-            .withMotorInverted(true)
+            // Not inverted: positive output and positive positions mean deploying outward (checked
+            // on the robot with Y). The REV Hardware Client follows the inversion saved on the
+            // SPARK, so check direction from robot code instead.
+            .withMotorInverted(false)
             .withStatorCurrentLimit(IntakeDeployConstants.CURRENT_LIMIT)
             .withClosedLoopRampRate(IntakeDeployConstants.RAMP_RATE)
             .withOpenLoopRampRate(IntakeDeployConstants.RAMP_RATE);
@@ -85,7 +84,7 @@ public class IntakeDeployIOSparkFlex implements IntakeDeployIO {
     this.rack = new Elevator(rackConfig);
     this.motor = rack.getMotor();
 
-    seedEncoderFromPot();
+    zeroEncoder();
   }
 
   /**
@@ -120,10 +119,8 @@ public class IntakeDeployIOSparkFlex implements IntakeDeployIO {
   }
 
   @Override
-  public void seedEncoderFromPot() {
-    if (RobotBase.isReal()) {
-      motor.setEncoderPosition(getPotPosition());
-    }
+  public void zeroEncoder() {
+    motor.setEncoderPosition(IntakeDeployConstants.LOWER_HARD_LIMIT);
   }
 
   @Override

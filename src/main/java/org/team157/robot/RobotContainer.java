@@ -147,6 +147,8 @@ public class RobotContainer {
     // IntakeDeploy/PositionInches should increase. Hold d-pad left to bring it back in.
     controller.y().whileTrue(intakeDeploy.set(0.25));
     controller.povLeft().whileTrue(intakeDeploy.set(-0.25));
+    // Push the intake all the way in, then press Back to zero the rack encoder
+    controller.back().onTrue(intakeDeploy.zeroEncoder());
     controller.povDown().onTrue(intakeDeploy.deploy());
     controller.povUp().onTrue(intakeDeploy.retract());
     // Wiggle while held, then go back out to keep intaking

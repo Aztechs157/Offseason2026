@@ -26,9 +26,11 @@ import yams.gearing.MechanismGearing;
  */
 public class IntakeDeployConstants {
   /** Rack motor CAN ID and potentiometer roboRIO analog input channel */
-  public static final int RACK_MOTOR_ID = 58, RACK_POTENTIOMETER_ID = 0;
+  public static final int RACK_MOTOR_ID = 58, RACK_POTENTIOMETER_ID = 1;
 
   /** Gearing from the motor to the pinion */
+  // something is fucked with the gearing, it should be 12:1 but it is not. I will need to check the
+  // pinion and the motor to see if they are correct.
   public static final MechanismGearing RACK_GEARING =
       new MechanismGearing(GearBox.fromStages("9:1", "24:18"));
 
@@ -83,22 +85,27 @@ public class IntakeDeployConstants {
   public static final ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0, 0);
 
   /** Trapezoidal motion profile limits for the rack */
-  public static final LinearVelocity MAX_VELOCITY = InchesPerSecond.of(25);
+  public static final LinearVelocity MAX_VELOCITY = InchesPerSecond.of(100);
 
-  public static final LinearAcceleration MAX_ACCELERATION = InchesPerSecondPerSecond.of(120);
+  public static final LinearAcceleration MAX_ACCELERATION = InchesPerSecondPerSecond.of(200);
 
   /** Physical hard stops of the rack (full travel) */
-  public static final Distance LOWER_HARD_LIMIT = Inches.of(0), UPPER_HARD_LIMIT = Inches.of(20.59);
+  public static final Distance LOWER_HARD_LIMIT = Inches.of(0), UPPER_HARD_LIMIT = Inches.of(22.59);
 
   /** How far inside each hard stop the soft limits sit, so the rack doesn't slam into them */
-  public static final Distance SOFT_LIMIT_MARGIN = Inches.of(0.25);
+  // WHEN WE GET BACK TO THE PIT AFTER A MATCH WE WILL NEED TO SET THIS TO A NEGATIVE VALUE (-50)TO
+  // GET
+  // THE INTAKE TO GO ALL THE WAY IN USING REV. IT IS CURRENTLY SET TO 0.01 INCHES SO THAT WE CAN
+  // TEST THE
+  // INTAKE WITHOUT IT HITTING THE HARD STOP AND BREAKING.
+  public static final Distance SOFT_LIMIT_MARGIN = Inches.of(0.01);
 
   /** Soft limits for the rack, enforced by the motor controller */
   public static final Distance LOWER_SOFT_LIMIT = LOWER_HARD_LIMIT.plus(SOFT_LIMIT_MARGIN),
       UPPER_SOFT_LIMIT = UPPER_HARD_LIMIT.minus(SOFT_LIMIT_MARGIN);
 
   /** How far the intake pulls back from deployed on each wiggle. TODO: tune */
-  public static final Distance WIGGLE_DISTANCE = Inches.of(6);
+  public static final Distance WIGGLE_DISTANCE = Inches.of(2);
 
   /** Setpoints for the rack. Must be between the soft limits. */
   public static final Distance RETRACTED_POSITION = LOWER_SOFT_LIMIT,
@@ -106,7 +113,7 @@ public class IntakeDeployConstants {
       WIGGLE_IN_POSITION = DEPLOYED_POSITION.minus(WIGGLE_DISTANCE);
 
   /** How close the rack must be to a setpoint to be considered there */
-  public static final Distance POSITION_TOLERANCE = Inches.of(0.25);
+  public static final Distance POSITION_TOLERANCE = Inches.of(0.1);
 
   /** Max time to spend on a full deploy/retract, or on one move in or out during a wiggle */
   public static final Time MOVE_TIMEOUT = Seconds.of(2), WIGGLE_MOVE_TIMEOUT = Seconds.of(0.6);
@@ -117,12 +124,6 @@ public class IntakeDeployConstants {
    * read "IntakeDeploy/PotRaw" in AdvantageScope with the intake pushed to each stop.
    */
   public static final double POT_AT_LOWER_HARD_LIMIT = 0.40, POT_AT_UPPER_HARD_LIMIT = 0.60;
-
-  /**
-   * If the motor encoder and pot disagree by more than this while disabled, the encoder is reseeded
-   * from the pot.
-   */
-  public static final Distance ENCODER_RESYNC_THRESHOLD = Inches.of(0.25);
 
   /** Slope of the rack from horizontal, negative = deploying moves down. Used for visualization */
   public static final Angle RACK_ANGLE = Degrees.of(-31.732522);

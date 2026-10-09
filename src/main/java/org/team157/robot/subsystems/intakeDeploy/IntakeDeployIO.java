@@ -29,7 +29,7 @@ public interface IntakeDeployIO {
     public double velocityInchesPerSecond = 0.0;
     /** Raw potentiometer reading, 0 to 1 (fraction of 5V) */
     public double potRaw = 0.0;
-    /** Rack position according to the potentiometer */
+    /** Rack position according to the potentiometer. Logged only, not used for control */
     public double potPositionInches = 0.0;
   }
 
@@ -44,11 +44,8 @@ public interface IntakeDeployIO {
   /** Updates the values for the simulated version of the intake deploy mechanism. */
   default void simIterate() {}
 
-  /**
-   * Resets the motor's encoder to the position read by the potentiometer. Does nothing in
-   * simulation, where there is no potentiometer.
-   */
-  default void seedEncoderFromPot() {}
+  /** Resets the motor's encoder so the rack's current position reads as fully retracted. */
+  default void zeroEncoder() {}
 
   /**
    * Moves the rack to a position, ending once it is within tolerance. The motor keeps holding the

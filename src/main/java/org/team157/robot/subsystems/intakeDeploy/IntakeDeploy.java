@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -85,12 +84,13 @@ public class IntakeDeploy extends SubsystemBase {
   }
 
   /**
-   * Resets the motor encoder to the potentiometer's position. Useful if the rack slipped teeth.
+   * Zeroes the motor encoder at the rack's current position. Only use with the intake pushed all
+   * the way in against the retracted hard stop. Works while disabled.
    *
-   * @return a {@link Command} reseeding the encoder from the potentiometer.
+   * @return a {@link Command} zeroing the rack's encoder.
    */
-  public Command seedEncoderFromPot() {
-    return Commands.runOnce(() -> io.seedEncoderFromPot()).ignoringDisable(true);
+  public Command zeroEncoder() {
+    return Commands.runOnce(() -> io.zeroEncoder()).ignoringDisable(true);
   }
 
   /**
@@ -123,13 +123,6 @@ public class IntakeDeploy extends SubsystemBase {
     // Updates the inputs to be logged by AdvantageKit and writes them to the Logger
     io.updateInputs(inputs);
     Logger.processInputs("IntakeDeploy", inputs);
-
-    // While disabled the rack can be moved by hand, so keep the encoder in sync with the pot.
-    if (DriverStation.isDisabled()
-        && Math.abs(inputs.potPositionInches - inputs.positionInches)
-            > IntakeDeployConstants.ENCODER_RESYNC_THRESHOLD.in(Inches)) {
-      io.seedEncoderFromPot();
-    }
   }
 
   @Override
