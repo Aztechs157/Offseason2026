@@ -70,4 +70,13 @@ public interface FlywheelIO {
   default Command setVelocity(Supplier<AngularVelocity> velocity) {
     return Commands.none();
   }
+
+  /**
+   * Runs SysId on the flywheel to measure its feedforward constants (kS, kV, kA).
+   *
+   * @return a {@link Command} running all four SysId tests in a row.
+   */
+  default Command sysId() {
+    return Commands.none();
+  }
 }

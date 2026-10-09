@@ -80,6 +80,16 @@ public class Flywheel extends SubsystemBase {
   }
 
   /**
+   * Runs SysId on the flywheel to measure its feedforward constants. Runs the dynamic and
+   * quasistatic tests forward and in reverse, so make sure no balls are loaded.
+   *
+   * @return {@link Command} running the flywheel SysId tests.
+   */
+  public Command sysId() {
+    return io.sysId();
+  }
+
+  /**
    * Set the flywheel to a dynamically-calculated velocity based on the current distance and height
    * to the target.
    *

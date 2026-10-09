@@ -10,14 +10,19 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
+import edu.wpi.first.units.VoltageUnit;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import yams.gearing.GearBox;
 import yams.gearing.MechanismGearing;
 
@@ -55,4 +60,9 @@ public final class FlywheelConstants {
   // determined experimentally.
   public static final double SPEED_FACTOR = 1 / 0.385;
   public static final Current CURRENT_LIMIT = Amps.of(40);
+  // SysId settings: voltage for the dynamic tests, how fast the voltage climbs in the quasistatic
+  // tests, and the max time for each test.
+  public static final Voltage SYSID_STEP_VOLTAGE = Volts.of(7);
+  public static final Velocity<VoltageUnit> SYSID_RAMP_RATE = Volts.of(1).per(Second);
+  public static final Time SYSID_TEST_DURATION = Seconds.of(8);
 }
