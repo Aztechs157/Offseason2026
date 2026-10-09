@@ -140,19 +140,21 @@ public class RobotContainer {
     configureButtonBindings();
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
-    controller.rightTrigger().whileTrue(intake.set(0.5));
+    controller.rightTrigger().whileTrue(intake.set(1));
     intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
     intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
     // TODO: temporary direction check, hold Y and the intake should move out and
     // IntakeDeploy/PositionInches should increase. Hold d-pad left to bring it back in.
-    controller.y().whileTrue(intakeDeploy.set(0.25));
-    controller.povLeft().whileTrue(intakeDeploy.set(-0.25));
-    // Push the intake all the way in, then press Back to zero the rack encoder
-    controller.back().onTrue(intakeDeploy.zeroEncoder());
+    // Manual intake deploy/retract for testing
+    // controller.a().whileTrue(intakeDeploy.set(0.5));
+    // controller.y().whileTrue(intakeDeploy.set(-0.5));
+    // // Push the intake all the way in, then press Back to zero the rack encoder
+    // controller.back().onTrue(intakeDeploy.zeroEncoder());
     controller.povDown().onTrue(intakeDeploy.deploy());
     controller.povUp().onTrue(intakeDeploy.retract());
-    // Wiggle while held, then go back out to keep intaking
-    controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
+    // // Wiggle while held, then go back out to keep intaking
+    // Wiggle not working
+    // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
     controller.leftTrigger().whileTrue(hopper.set(0.5));
