@@ -1,17 +1,19 @@
 package org.team157.robot;
 
-/** Automatically generated file containing build version information. */
+/**
+ * Automatically generated file containing build version information.
+ */
 public final class BuildConstants {
   public static final String MAVEN_GROUP = "";
-  public static final String MAVEN_NAME = "Offseason2026-1";
+  public static final String MAVEN_NAME = "Offseason2026";
   public static final String VERSION = "unspecified";
-  public static final int GIT_REVISION = 4;
-  public static final String GIT_SHA = "2c6f92a16e96561aef93aabcae4b94d8e154f158";
-  public static final String GIT_DATE = "2026-05-01 17:59:37 EDT";
-  public static final String GIT_BRANCH = "dev";
-  public static final String BUILD_DATE = "2026-05-05 18:29:50 EDT";
-  public static final long BUILD_UNIX_TIME = 1778020190555L;
-  public static final int DIRTY = 0;
+  public static final int GIT_REVISION = 9;
+  public static final String GIT_SHA = "aff2ddb62d557ca50c4562e93bbcc666b5ee9c10";
+  public static final String GIT_DATE = "2026-07-07 18:15:49 EDT";
+  public static final String GIT_BRANCH = "hoodSubsystem";
+  public static final String BUILD_DATE = "2026-10-09 12:23:03 EDT";
+  public static final long BUILD_UNIX_TIME = 1791562983027L;
+  public static final int DIRTY = 1;
 
-  private BuildConstants() {}
+  private BuildConstants(){}
 }

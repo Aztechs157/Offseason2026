@@ -7,6 +7,8 @@
 
 package org.team157.robot;
 
+import static edu.wpi.first.units.Units.RPM;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,8 +27,16 @@ import org.team157.robot.subsystems.drive.GyroIOPigeon2;
 import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
+import org.team157.robot.subsystems.flywheel.Flywheel;
+import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
 import org.team157.robot.subsystems.hood.Hood;
 import org.team157.robot.subsystems.hood.HoodIOSparkMax;
+import org.team157.robot.subsystems.hopper.Hopper;
+import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
+import org.team157.robot.subsystems.intake.Intake;
+import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.uptake.Uptake;
+import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -45,6 +55,10 @@ public class RobotContainer {
   private final LoggedDashboardChooser<Command> autoChooser;
 
   public Hood hood = new Hood();
+  public Flywheel flywheel = new Flywheel();
+  public Hopper hopper = new Hopper();
+  public Intake intake = new Intake();
+  public Uptake uptake = new Uptake();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -125,6 +139,20 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
     hood.setIO(new HoodIOSparkMax(hood));
+    intake.setIO(new IntakeIOTalonFX(intake));
+    intake.setDefaultCommand(intake.getDefault());
+    controller.rightTrigger().whileTrue(intake.set(0.5));
+    hopper.setIO(new HopperIOTalonFX(hopper));
+    hopper.setDefaultCommand(hopper.getDefault());
+    controller.leftTrigger().whileTrue(hopper.set(0.5));
+    uptake.setIO(new UptakeIOSparkMax(uptake));
+    uptake.setDefaultCommand(uptake.getDefault());
+    controller.rightBumper().whileTrue(uptake.set(0.5));
+    flywheel.setIO(new FlywheelIOSparkflex(flywheel));
+    flywheel.setDefaultCommand(flywheel.getDefault());
+    controller.leftBumper().whileTrue(flywheel.setVelocity(RPM.of(1000)));
+    // Must be added after setIO, the SysId command is built from the IO layer
+    autoChooser.addOption("Flywheel SysId", flywheel.sysId());
   }
 
   /**
