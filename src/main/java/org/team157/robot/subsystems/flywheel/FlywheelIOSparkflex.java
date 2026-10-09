@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Celsius;
 import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Volts;
 
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -16,6 +15,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.function.Supplier;
+import org.team157.robot.Constants.TelemetryConstants;
 import yams.mechanisms.config.FlyWheelConfig;
 import yams.mechanisms.velocity.FlyWheel;
 import yams.motorcontrollers.SmartMotorController;
@@ -28,13 +28,9 @@ public class FlywheelIOSparkflex implements FlywheelIO {
 
   private final FlyWheel flywheel;
   private final SmartMotorController motor;
-  // motor object for sysID voltage control
   private final SparkFlex sparkFlex;
-  // initial voltage for sysID voltage control
-  private final VoltageOut voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
   public FlywheelIOSparkflex(SubsystemBase subsystem) {
-    // TODO: actual ids here
     this.sparkFlex = new SparkFlex(FlywheelConstants.MOTOR_ID_RIGHT, MotorType.kBrushless);
     SparkMax followerSparkMax_RIGHT =
         new SparkMax(FlywheelConstants.FOLLOWER_MOTOR_ID_RIGHT, MotorType.kBrushless);
@@ -46,6 +42,8 @@ public class FlywheelIOSparkflex implements FlywheelIO {
     SmartMotorControllerConfig flywheelMotorConfig =
         new SmartMotorControllerConfig(subsystem)
             .withControlMode(ControlMode.CLOSED_LOOP)
+            // A telemetry name is required by YAMS to create the SysId routine
+            .withTelemetry("FlywheelMotor", TelemetryConstants.TELEMETRY_VERBOSITY)
             .withClosedLoopController(
                 FlywheelConstants.KP,
                 FlywheelConstants.KI,
@@ -103,11 +101,14 @@ public class FlywheelIOSparkflex implements FlywheelIO {
   public void stop() {
     flywheel.setDutyCycleSetpoint(0);
   }
-  // TODO: find out what the sparkmax voltage control method is and implement this
-  // @Override
-  // public void setVoltage(double volts) {
-  //     sparkMax.set(voltageRequest.withOutput(volts));
-  // }
+
+  @Override
+  public Command sysId() {
+    return flywheel.sysId(
+        FlywheelConstants.SYSID_STEP_VOLTAGE,
+        FlywheelConstants.SYSID_RAMP_RATE,
+        FlywheelConstants.SYSID_TEST_DURATION);
+  }
 
   @Override
   public Command set(double dutyCycle) {

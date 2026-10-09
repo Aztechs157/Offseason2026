@@ -164,6 +164,8 @@ public class RobotContainer {
     flywheel.setIO(new FlywheelIOSparkflex(flywheel));
     flywheel.setDefaultCommand(flywheel.getDefault());
     controller.leftBumper().whileTrue(flywheel.setVelocity(RPM.of(1000)));
+    // Must be added after setIO, the SysId command is built from the IO layer
+    autoChooser.addOption("Flywheel SysId", flywheel.sysId());
   }
 
   /**
