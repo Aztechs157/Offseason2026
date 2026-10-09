@@ -23,12 +23,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.LinkedList;
 import java.util.List;
-import org.ejml.simple.SimpleMatrix;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.PhotonUtils;
 import org.team157.robot.Constants.FieldConstants;
-import org.team157.robot.RobotContainer;
-import org.team157.robot.subsystems.SandstormMechanism3D.Mechanism3DConstants;
 import org.team157.robot.subsystems.drive.Drive;
 import org.team157.robot.subsystems.vision.VisionIO.PoseObservationType;
 
@@ -40,16 +36,11 @@ public class Vision extends SubsystemBase {
 
   private boolean isBlueAlliance = true;
 
-  private static double angleToUnadjustedTargetFromDrive = 0;
-
-  private static double distanceToTargetFromTurret = 0;
-  private static double angleToTargetFromTurret = 0;
-
-  private double driveLinearVelocityX;
-  private double driveLinearVelocityY;
-  private double driveRotationalVelocity;
-  private double driveFieldRotation;
-  private double ballTOF;
+  // Targeting values, updated every loop by the default command
+  private Rotation2d driveAngleToFaceTarget = Rotation2d.kZero;
+  private double distanceToTarget = 0;
+  private boolean isAimed = false;
+  private boolean isUnderTrench = false;
 
   public Vision(VisionConsumer consumer, VisionIO... io) {
     this.consumer = consumer;
@@ -79,23 +70,27 @@ public class Vision extends SubsystemBase {
     return inputs[cameraIndex].latestTargetObservation.tx();
   }
 
+  /**
+   * Keeps the targeting values (angle and distance to the current target) up to date. Also runs
+   * while disabled, so targeting can be checked in AdvantageScope by pushing the robot around.
+   *
+   * @param drivetrain The drivetrain, used for the robot's current pose.
+   * @return a {@link Command} updating the targeting values every loop.
+   */
   public Command setDefault(Drive drivetrain) {
-    return run(
-        () -> {
-          driveLinearVelocityX = drivetrain.getChassisSpeeds().vxMetersPerSecond;
-          driveLinearVelocityY = drivetrain.getChassisSpeeds().vyMetersPerSecond;
-          driveRotationalVelocity = drivetrain.getChassisSpeeds().omegaRadiansPerSecond;
-          driveFieldRotation = drivetrain.getPose().getRotation().getRadians();
-          // ballTOF = Flywheel.getBallTimeOfFlight();
-          Logger.recordOutput("Targeting/Target Pose", getDesiredPose(drivetrain.getPose()));
-        });
+    return run(() -> {
+          updateAlliance();
+          Pose2d robotPose = drivetrain.getPose();
+          setTargetParams(getDesiredPose(robotPose), robotPose);
+        })
+        .ignoringDisable(true);
   }
 
   /**
-   * Gets the aiming target of the turret, based on the current alliance, and the robot's current
-   * location on the field.
+   * Gets the point the robot should shoot at, based on the current alliance and the robot's
+   * location on the field (the hub, or a passing point when in the neutral zone).
    *
-   * @return the target point on the field the turret should be aiming at, as a Pose2d.
+   * @return the target point on the field, as a Pose2d.
    */
   public Pose2d getDesiredPose(Pose2d robotPose) {
     return FieldConstants.positionDetails.getTargetPose2d(robotPose, isBlueAlliance);
@@ -108,150 +103,72 @@ public class Vision extends SubsystemBase {
   }
 
   /**
-   * Calculate the angle and distance to a certain target from the robot's pose.
+   * Calculates the heading that points the back of the robot (where the dumper shoots from) at the
+   * target, and the distance from the shooter to the target.
    *
-   * @param targetPose the target Pose2d to calculate angle/distance to
-   * @param robotPose the current Pose2d of the robot to calculate angle/distance from
+   * @param targetPose the target Pose2d to aim at
+   * @param robotPose the current Pose2d of the robot
    */
   public void setTargetParams(Pose2d targetPose, Pose2d robotPose) {
+    // The shooter is on the robot's centerline, so facing the back of the robot at the target from
+    // the robot's center also lines up the shooter.
+    Rotation2d angleFromRobotToTarget =
+        targetPose.getTranslation().minus(robotPose.getTranslation()).getAngle();
+    driveAngleToFaceTarget = angleFromRobotToTarget.plus(Rotation2d.k180deg);
 
-    // beginning vector math for momentum shooting
-    double turretToRobotTheta =
-        Math.atan(
-            Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET.getY()
-                / Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET.getX());
-    SimpleMatrix turretToRobotThetaMatrix =
-        new SimpleMatrix(2, 1, true, -Math.sin(turretToRobotTheta), Math.cos(turretToRobotTheta));
-    double dOffsetRobot =
-        Math.hypot(
-            Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET.getX(),
-            Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET.getY());
+    Pose2d shooterPose = robotPose.transformBy(VisionConstants.ROBOT_TO_SHOOTER);
+    distanceToTarget = shooterPose.getTranslation().getDistance(targetPose.getTranslation());
 
-    SimpleMatrix vRotationRobot =
-        turretToRobotThetaMatrix.scale(driveRotationalVelocity * dOffsetRobot);
+    isAimed =
+        Math.abs(robotPose.getRotation().minus(driveAngleToFaceTarget).getRadians())
+            < VisionConstants.AIM_TOLERANCE.getRadians();
 
-    SimpleMatrix robotRotationMatrix =
-        new SimpleMatrix(
-            2,
-            2,
-            true,
-            new double[] {
-              Math.cos(driveFieldRotation),
-              -Math.sin(driveFieldRotation),
-              Math.sin(driveFieldRotation),
-              Math.cos(driveFieldRotation)
-            });
+    // The hood is at the back of the robot, so check where the shooter is rather than the center
+    isUnderTrench = FieldConstants.positionDetails.isUnderTrench(shooterPose);
+    Logger.recordOutput("Targeting/Is Under Trench", isUnderTrench);
 
-    SimpleMatrix vRotationField = robotRotationMatrix.mult(vRotationRobot);
-
-    SimpleMatrix vShooter =
-        vRotationField.plus(
-            new SimpleMatrix(2, 1, true, driveLinearVelocityX, driveLinearVelocityY));
-
-    SimpleMatrix adjustedTargetPoseMatrix =
-        new SimpleMatrix(2, 1, true, targetPose.getX(), targetPose.getY())
-            .minus(vShooter.scale(ballTOF));
-
-    Pose2d adjustedTargetPose =
-        new Pose2d(
-            adjustedTargetPoseMatrix.get(0, 0),
-            adjustedTargetPoseMatrix.get(1, 0),
-            targetPose.getRotation());
-
-    // If the hub is the target, rotate the target about the hub by the drive orientation
-    if (Math.round(targetPose.getY()) == Math.round(FieldConstants.FIELD_WIDTH.magnitude() / 2)) {
-      adjustedTargetPose =
-          adjustedTargetPose.rotateAround(
-              targetPose.getTranslation(), new Rotation2d(driveFieldRotation));
-    } else {
-      adjustedTargetPose =
-          adjustedTargetPose.rotateAround(
-              targetPose.getTranslation(), new Rotation2d(Math.PI - driveFieldRotation));
-    }
-
-    // Distance and Angle from the turret to the adjusted target
-    distanceToTargetFromTurret =
-        PhotonUtils.getDistanceToPose(
-            robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET),
-            adjustedTargetPose);
-
-    angleToTargetFromTurret =
-        PhotonUtils.getYawToPose(
-                robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET),
-                adjustedTargetPose)
-            .getDegrees();
-
-    // Angle from the drivebase to the non-adjusted target.
-    angleToUnadjustedTargetFromDrive = PhotonUtils.getYawToPose(robotPose, targetPose).getDegrees();
-
-    if (VisionConstants.USE_MOMENTUM) {
-      distanceToTargetFromTurret =
-          PhotonUtils.getDistanceToPose(
-              robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET),
-              adjustedTargetPose);
-
-      angleToTargetFromTurret =
-          PhotonUtils.getYawToPose(
-                  robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET),
-                  adjustedTargetPose)
-              .getDegrees();
-    } else {
-      distanceToTargetFromTurret =
-          PhotonUtils.getDistanceToPose(
-              robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET), targetPose);
-
-      angleToTargetFromTurret =
-          PhotonUtils.getYawToPose(
-                  robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET), targetPose)
-              .getDegrees();
-    }
-
-    // Logger outputs
-    Logger.recordOutput("Targeting/Adjusted Target Pose", adjustedTargetPose);
-    Logger.recordOutput("Targeting/Distance to Target from Turret", distanceToTargetFromTurret);
-    Logger.recordOutput("Targeting/Angle to Target from Turret", angleToTargetFromTurret);
-  }
-
-  // TODO: make this an overload of the first method? have juggling enabled on a combination
-  // button press
-  public void setTargetParamsForJuggling(Pose2d robotPose) {
-    distanceToTargetFromTurret =
-        PhotonUtils.getDistanceToPose(
-            robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET), robotPose);
-
-    angleToTargetFromTurret =
-        PhotonUtils.getYawToPose(
-                robotPose.plus(Mechanism3DConstants.XY_ORIGIN_TO_TURRET_BASE_OFFSET), robotPose)
-            .getDegrees();
+    Logger.recordOutput("Targeting/Target Pose", targetPose);
+    Logger.recordOutput("Targeting/Shooter Pose", shooterPose);
+    Logger.recordOutput("Targeting/Drive Angle to Face Target", driveAngleToFaceTarget);
+    Logger.recordOutput("Targeting/Distance to Target", distanceToTarget);
+    Logger.recordOutput("Targeting/Is Aimed", isAimed);
   }
 
   /**
-   * Gets the setpoint angle for the drivebase to face the hub.
+   * Gets the field-relative heading that points the back of the robot at the target.
    *
-   * @return the {@link Rotation2d} of the yaw difference from the robot's rear to the hub.
+   * @return the {@link Rotation2d} heading for the drivetrain to hold while shooting.
    */
-  public Rotation2d getDriveAngleToFaceHub() {
-    // Adds 180, as we want the intake facing away while shooting, dumper-style.
-    return Rotation2d.fromDegrees(angleToUnadjustedTargetFromDrive + 180)
-        .plus(RobotContainer.drive.getRotation());
+  public Rotation2d getDriveAngleToFaceTarget() {
+    return driveAngleToFaceTarget;
   }
 
   /**
-   * Gets the desired angle for the turret based on the adjusted target pose.
+   * Gets the distance from the shooter (back center of the robot) to the target.
    *
-   * @return The setpoint angle for the turret, in degrees.
+   * @return The distance to the target, in meters.
    */
-  public double getTurretAngle() {
-    return angleToTargetFromTurret;
+  public double getDistanceToTarget() {
+    return distanceToTarget;
   }
 
   /**
-   * Gets the distance from the turret to the virtual target.
+   * Whether the back of the robot is pointed at the target, within {@link
+   * VisionConstants#AIM_TOLERANCE}.
    *
-   * @return The distance from the turret's center to the virtual target, in meters.
+   * @return true if the robot is aimed at the target.
    */
-  public double getDistanceToTargetFromTurret() {
-    return distanceToTargetFromTurret;
+  public boolean isAimed() {
+    return isAimed;
+  }
+
+  /**
+   * Whether the shooter (and hood) at the back of the robot is under one of the trenches.
+   *
+   * @return true if the hood must stay at its trench-safe angle.
+   */
+  public boolean isUnderTrench() {
+    return isUnderTrench;
   }
 
   @Override

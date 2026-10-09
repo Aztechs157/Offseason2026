@@ -36,6 +36,13 @@ public class HoodConstants {
       UPPER_SOFT_LIMIT = UPPER_HARD_LIMIT.minus(SOFT_LIMIT_MARGIN);
 
   /**
+   * Hood angle low enough to fit under the trench. The hood stows here when not shooting, and only
+   * shoots from here while under a trench. TODO: confirm which end of the hood's travel is lowest
+   * (the 2026 robot stowed at its upper limit)
+   */
+  public static final Angle TRENCH_SAFE_ANGLE = UPPER_SOFT_LIMIT;
+
+  /**
    * Raw encoder readings (0 to 1 rotations) with the hood pushed against each hard stop. TODO: read
    * "Hood/EncoderPositionRotations" in AdvantageScope with the hood pushed to each stop.
    */

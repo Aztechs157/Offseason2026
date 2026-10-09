@@ -9,13 +9,21 @@ package org.team157.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
-  // When true, enables adjustment of virtual target to account for momentum in dynamic shooting
-  // calculations
-  public static final boolean USE_MOMENTUM = false;
+  /**
+   * Where the balls leave the robot, relative to the robot's center: the back center of the robot,
+   * facing backward. Distance to the target is measured from here. TODO: measure, x is minus half
+   * the robot's length (including bumpers)
+   */
+  public static final Transform2d ROBOT_TO_SHOOTER = new Transform2d(-0.4, 0.0, Rotation2d.k180deg);
+
+  /** How close the robot's heading must be to the target heading before feeding balls to shoot */
+  public static final Rotation2d AIM_TOLERANCE = Rotation2d.fromDegrees(3);
 
   // AprilTag layout
   public static AprilTagFieldLayout aprilTagLayout =

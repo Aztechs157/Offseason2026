@@ -59,6 +59,16 @@ public final class FlywheelConstants {
   // RPM multiplier to account for external factors like air resistance and wheel slip. This is
   // determined experimentally.
   public static final double SPEED_FACTOR = 1 / 0.385;
+  // Flywheel speed when shooting with dumper mode off. TODO: tune
+  public static final AngularVelocity MANUAL_SHOT_VELOCITY = RPM.of(1000);
+  // Limits for the calculated (dumper mode) flywheel speed. The top limit is a bit under the
+  // flywheel's free speed (NEO through 32:22 is about 3900 RPM). TODO: tune
+  public static final AngularVelocity MIN_DYNAMIC_VELOCITY = RPM.of(1000),
+      MAX_DYNAMIC_VELOCITY = RPM.of(3600);
+  // How close the flywheel must be to its target speed before balls are fed in to shoot.
+  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
+  // Max time to wait for the flywheel to spin up (and the robot to aim) before feeding anyway.
+  public static final Time SPIN_UP_TIMEOUT = Seconds.of(1.5);
   public static final Current CURRENT_LIMIT = Amps.of(40);
   // SysId settings: voltage for the dynamic tests, how fast the voltage climbs in the quasistatic
   // tests, and the max time for each test.
