@@ -34,12 +34,13 @@ import org.team157.robot.subsystems.flywheel.Flywheel;
 import org.team157.robot.subsystems.flywheel.FlywheelConstants;
 import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
 import org.team157.robot.subsystems.hood.Hood;
-import org.team157.robot.subsystems.hood.HoodConstants;
 import org.team157.robot.subsystems.hood.HoodIOSparkMax;
 import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
 import org.team157.robot.subsystems.intake.Intake;
 import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
 import org.team157.robot.subsystems.uptake.Uptake;
 import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 import org.team157.robot.subsystems.vision.Vision;
@@ -71,6 +72,7 @@ public class RobotContainer {
   public Hopper hopper = new Hopper();
   public Intake intake = new Intake();
   public Uptake uptake = new Uptake();
+  public IntakeDeploy intakeDeploy = new IntakeDeploy();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -176,10 +178,13 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.getDefault());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
+    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
     flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
     flywheel.setDefaultCommand(flywheel.getDefault());
+    // Must be added after setIO, the SysId command is built from the IO layer
     autoChooser.addOption("Flywheel SysId", flywheel.sysId());
 
     // Configure the button bindings
@@ -204,9 +209,10 @@ public class RobotContainer {
     // running.
     vision.setDefaultCommand(vision.setDefault(drive));
 
-    // Lock to 0° when A button is held
+    // Lock to 0° when A and Start are held together
     controller
         .a()
+        .and(controller.start())
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -240,16 +246,23 @@ public class RobotContainer {
     controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
 
     // Run the intake while held
-    controller.leftTrigger().whileTrue(intake.set(0.5));
+    controller.leftTrigger().whileTrue(intake.set(1));
 
-    // TODO: temporary hood direction check, hold Start and the hood angle should increase
-    // (Hood/AngleDegrees goes up). Hold Back to lower it. Ignored while both are held, since that
-    // toggles Dumper Mode.
-    controller.start().and(controller.back().negate()).whileTrue(hood.set(0.05));
-    controller.back().and(controller.start().negate()).whileTrue(hood.set(-0.05));
-    // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
-    controller.leftStick().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
-    controller.rightStick().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+    // Run the hopper while held
+    controller.rightBumper().whileTrue(hopper.set(0.5));
+
+    // Deploy or retract the intake
+    controller.povDown().onTrue(intakeDeploy.deploy());
+    controller.povUp().onTrue(intakeDeploy.retract());
+    // Wiggle not working
+    // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
+
+    // TODO: temporary manual hood control
+    controller.y().whileTrue(hood.set(0.25));
+    controller.a().whileTrue(hood.set(-0.25));
+    // // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
+    // controller.leftStick().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
+    // controller.rightStick().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
   }
 
   /**
