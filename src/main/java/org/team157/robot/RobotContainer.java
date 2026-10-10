@@ -169,13 +169,13 @@ public class RobotContainer {
     // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
-    controller.leftTrigger().whileTrue(hopper.set(0.5));
+    controller.leftBumper().whileTrue(hopper.set(0.5));
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
-    controller.rightBumper().whileTrue(uptake.set(0.5));
+    controller.leftBumper().whileTrue(uptake.set(0.5));
     flywheel.setIO(new FlywheelIOSparkflex(flywheel));
     flywheel.setDefaultCommand(flywheel.getDefault());
-    controller.leftBumper().whileTrue(flywheel.setVelocity(RPM.of(1000)));
+    controller.leftTrigger().whileTrue(flywheel.setVelocity(RPM.of(1550)));
     // Must be added after setIO, the SysId command is built from the IO layer
     autoChooser.addOption("Flywheel SysId", flywheel.sysId());
   }
