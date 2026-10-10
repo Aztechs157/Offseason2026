@@ -152,7 +152,7 @@ public class RobotContainer {
     // controller.rightStick().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
-    controller.rightTrigger().whileTrue(intake.set(1));
+    controller.leftTrigger().whileTrue(intake.set(1));
     intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
     intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
     // TODO: temporary direction check, hold Y and the intake should move out and
@@ -169,13 +169,13 @@ public class RobotContainer {
     // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
-    controller.leftBumper().whileTrue(hopper.set(0.5));
+    controller.rightBumper().whileTrue(hopper.set(0.5));
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
-    controller.leftBumper().whileTrue(uptake.set(0.5));
+    controller.rightBumper().whileTrue(uptake.set(0.5));
     flywheel.setIO(new FlywheelIOSparkflex(flywheel));
     flywheel.setDefaultCommand(flywheel.getDefault());
-    controller.leftTrigger().whileTrue(flywheel.setVelocity(RPM.of(1550)));
+    controller.rightTrigger().whileTrue(flywheel.setVelocity(RPM.of(1550)));
     // Must be added after setIO, the SysId command is built from the IO layer
     autoChooser.addOption("Flywheel SysId", flywheel.sysId());
   }
