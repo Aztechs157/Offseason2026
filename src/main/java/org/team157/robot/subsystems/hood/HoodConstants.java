@@ -23,10 +23,10 @@ public class HoodConstants {
 
   /** 3:1 MAXPlanetary slice on the motor, then 1:4 from the gearbox output to the hood */
   public static final MechanismGearing GEARING =
-      new MechanismGearing(GearBox.fromStages("3:1", "1:4"));
+      new MechanismGearing(GearBox.fromStages("3:1", "4:1"));
 
   /** Physical hard stops of the hood. TODO: measure on robot (these are from the 2026 robot) */
-  public static final Angle LOWER_HARD_LIMIT = Degrees.of(40), UPPER_HARD_LIMIT = Degrees.of(65);
+  public static final Angle LOWER_HARD_LIMIT = Degrees.of(22), UPPER_HARD_LIMIT = Degrees.of(42.5);
 
   /** How far inside each hard stop the soft limits sit, so the hood doesn't slam into them */
   public static final Angle SOFT_LIMIT_MARGIN = Degrees.of(2);
@@ -39,7 +39,7 @@ public class HoodConstants {
    * Raw encoder readings (0 to 1 rotations) with the hood pushed against each hard stop. TODO: read
    * "Hood/EncoderPositionRotations" in AdvantageScope with the hood pushed to each stop.
    */
-  public static final double ENCODER_AT_LOWER_HARD_LIMIT = 0.32, ENCODER_AT_UPPER_HARD_LIMIT = 0.86;
+  public static final double ENCODER_AT_LOWER_HARD_LIMIT = 0.62, ENCODER_AT_UPPER_HARD_LIMIT = 0.26;
 
   /**
    * Shifts where the encoder's reading wraps from 1 back to 0. If the reading jumps between 0 and 1
