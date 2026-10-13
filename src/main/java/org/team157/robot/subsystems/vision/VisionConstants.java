@@ -30,8 +30,8 @@ public class VisionConstants {
       AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
 
   // Camera names, must match names configured on coprocessor
-  public static String camera0Name = "frontLeftCam";
-  public static String camera1Name = "frontRightCam";
+  public static String camera0Name = "Left Cam";
+  public static String camera1Name = "Right Cam";
 
   // Robot to camera transforms
   // Transform:
@@ -67,8 +67,8 @@ public class VisionConstants {
   // (Adjust to trust some cameras more than others)
   public static double[] cameraStdDevFactors =
       new double[] {
-        1.0, // Camera 0 (frontLeftCam)
-        1.0, // Camera 1 (frontRightCam)
+        1.0, // Camera 0 (Left Cam)
+        1.0, // Camera 1 (Right Cam)
       };
 
   // Multipliers to apply for MegaTag 2 observations
