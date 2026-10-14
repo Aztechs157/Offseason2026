@@ -33,7 +33,7 @@ public final class FlywheelConstants {
       FOLLOWER_MOTOR_ID_LEFT_1 = 56,
       FOLLOWER_MOTOR_ID_LEFT_2 = 57;
   // Closed-loop control values for the flywheel.
-  public static final double KP = 2, KI = 0, KD = 0;
+  public static final double KP = 0.6, KI = 0, KD = 0.02;
   public static final double KS = 0.0, KV = 0.0, KA = 0.0;
   public static final double SIM_KP = 1.57, SIM_KI = 0, SIM_KD = 0.157;
   public static final double SIM_KS = 0.0,
@@ -58,7 +58,7 @@ public final class FlywheelConstants {
       FLYWHEEL_RPM_LIMIT_LOWER = RPM.of(-5800);
   // RPM multiplier to account for external factors like air resistance and wheel slip. This is
   // determined experimentally.
-  public static final double SPEED_FACTOR = 1 / 0.67;
+  public static final double SPEED_FACTOR = 1 / 0.57;
   // Flywheel speed when shooting with dumper mode off (hood stowed). Set from testing on the robot.
   // TODO: tune with real shots
   public static final AngularVelocity MANUAL_SHOT_VELOCITY = RPM.of(1550);

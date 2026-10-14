@@ -34,13 +34,14 @@ import org.team157.robot.subsystems.flywheel.Flywheel;
 import org.team157.robot.subsystems.flywheel.FlywheelConstants;
 import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
 import org.team157.robot.subsystems.hood.Hood;
+import org.team157.robot.subsystems.hood.HoodConstants;
 import org.team157.robot.subsystems.hood.HoodIOSparkMax;
 import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
-import org.team157.robot.subsystems.intake.Intake;
-import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
-import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
-import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
+// import org.team157.robot.subsystems.intake.Intake;
+// import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+// import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
+// import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
 import org.team157.robot.subsystems.uptake.Uptake;
 import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 import org.team157.robot.subsystems.vision.Vision;
@@ -70,9 +71,9 @@ public class RobotContainer {
   public Hood hood = new Hood();
   public Flywheel flywheel = new Flywheel();
   public Hopper hopper = new Hopper();
-  public Intake intake = new Intake();
+  //   public Intake intake = new Intake();
   public Uptake uptake = new Uptake();
-  public IntakeDeploy intakeDeploy = new IntakeDeploy();
+  //   public IntakeDeploy intakeDeploy = new IntakeDeploy();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -174,12 +175,12 @@ public class RobotContainer {
     // commands are built from the IO layer.
     hood.setIO(new HoodIOSparkMax(hood));
     hood.setDefaultCommand(hood.getDefault());
-    intake.setIO(new IntakeIOTalonFX(intake));
-    intake.setDefaultCommand(intake.getDefault());
+    // intake.setIO(new IntakeIOTalonFX(intake));
+    // intake.setDefaultCommand(intake.getDefault());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
-    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
-    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
+    // intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    // intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
     flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
@@ -246,23 +247,23 @@ public class RobotContainer {
     controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
 
     // Run the intake while held
-    controller.leftTrigger().whileTrue(intake.set(1));
+    // controller.leftTrigger().whileTrue(intake.set(1));
 
     // Run the hopper while held
     controller.rightBumper().whileTrue(hopper.set(0.5));
 
     // Deploy or retract the intake
-    controller.povDown().onTrue(intakeDeploy.deploy());
-    controller.povUp().onTrue(intakeDeploy.retract());
+    // controller.povDown().onTrue(intakeDeploy.deploy());
+    // controller.povUp().onTrue(intakeDeploy.retract());
     // Wiggle not working
     // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
 
     // TODO: temporary manual hood control
-    controller.y().whileTrue(hood.set(0.25));
-    controller.a().whileTrue(hood.set(-0.25));
+    // controller.y().whileTrue(hood.set(0.25));
+    // controller.a().whileTrue(hood.set(-0.25));
     // // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
-    // controller.leftStick().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
-    // controller.rightStick().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+    controller.y().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
+    controller.a().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
   }
 
   /**
@@ -317,7 +318,7 @@ public class RobotContainer {
   private Command feedWhenReady(BooleanSupplier ready) {
     return Commands.waitUntil(ready)
         .withTimeout(FlywheelConstants.SPIN_UP_TIMEOUT.in(Seconds))
-        .andThen(Commands.parallel(hopper.set(0.5), uptake.set(0.5)));
+        .andThen(Commands.parallel(hopper.set(1), uptake.set(1)));
   }
 
   /**

@@ -26,7 +26,7 @@ public class HoodConstants {
       new MechanismGearing(GearBox.fromStages("3:1", "4:1"));
 
   /** Physical hard stops of the hood. TODO: measure on robot (these are from the 2026 robot) */
-  public static final Angle LOWER_HARD_LIMIT = Degrees.of(22), UPPER_HARD_LIMIT = Degrees.of(42.5);
+  public static final Angle LOWER_HARD_LIMIT = Degrees.of(68), UPPER_HARD_LIMIT = Degrees.of(47.5);
 
   /** How far inside each hard stop the soft limits sit, so the hood doesn't slam into them */
   public static final Angle SOFT_LIMIT_MARGIN = Degrees.of(2);
