@@ -16,9 +16,10 @@ import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
   /**
-   * Where the balls leave the robot, relative to the robot's center: the back center of the robot,
-   * facing backward. Distance to the target is measured from here. TODO: measure, x is minus half
-   * the robot's length (including bumpers)
+   * Where the ball leaves the shooter, relative to the drivetrain center, facing backward. Distance
+   * to the target is measured from here. x is negative (behind center), y is 0 if the shooter is
+   * centered side to side. This is the shooter's exit point, which may be inside the bumpers, not
+   * the back edge of the robot. TODO: measure (placeholder)
    */
   public static final Transform2d ROBOT_TO_SHOOTER = new Transform2d(-0.4, 0.0, Rotation2d.k180deg);
 

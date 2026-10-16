@@ -49,7 +49,8 @@ public final class FlywheelConstants {
   public static final Distance FLYWHEEL_DIAMETER = Inches.of(6);
   // Mass of the flywheel (including shooter wheels), in pounds.
   public static final Mass FLYWHEEL_MASS = Pounds.of(1);
-  // Z distance from the center of the flywheel to the ground, in meters.
+  // Height above the floor where the ball leaves the shooter (along the hood, which can be above
+  // the flywheel's center). TODO: measure (placeholder, likely from the 2026 robot)
   public static final Distance HEIGHT = Meters.of(0.523);
 
   public static final Time RAMP_RATE = Seconds.of(0.00157);
