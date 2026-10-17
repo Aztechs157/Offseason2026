@@ -21,7 +21,8 @@ public class VisionConstants {
    * centered side to side. This is the shooter's exit point, which may be inside the bumpers, not
    * the back edge of the robot. TODO: measure (placeholder)
    */
-  public static final Transform2d ROBOT_TO_SHOOTER = new Transform2d(-0.4, 0.0, Rotation2d.k180deg);
+  public static final Transform2d ROBOT_TO_SHOOTER =
+      new Transform2d(-0.136421, 0.0, Rotation2d.k180deg);
 
   /** How close the robot's heading must be to the target heading before feeding balls to shoot */
   public static final Rotation2d AIM_TOLERANCE = Rotation2d.fromDegrees(3);
@@ -51,9 +52,9 @@ public class VisionConstants {
   //      +Z -> +Z (the same)
 
   public static Transform3d robotToCamera0 =
-      new Transform3d(-0.127, 0.3302, 0.3556, new Rotation3d(0.0, 0.0, Math.toRadians(65)));
+      new Transform3d(0.102688, 0.314204, 0.298450, new Rotation3d(0.0, 0.0, Math.toRadians(75)));
   public static Transform3d robotToCamera1 =
-      new Transform3d(-0.127, -0.3302, 0.3556, new Rotation3d(0.0, 0.0, Math.toRadians(-65)));
+      new Transform3d(0.102688, -0.314204, 0.298450, new Rotation3d(0.0, 0.0, Math.toRadians(-75)));
 
   // Basic filtering thresholds
   public static double maxAmbiguity = 0.3;

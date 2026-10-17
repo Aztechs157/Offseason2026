@@ -25,28 +25,27 @@ public class HoodConstants {
   public static final MechanismGearing GEARING =
       new MechanismGearing(GearBox.fromStages("3:1", "4:1"));
 
-  /** Physical hard stops of the hood. TODO: measure on robot (these are from the 2026 robot) */
-  public static final Angle LOWER_HARD_LIMIT = Degrees.of(68), UPPER_HARD_LIMIT = Degrees.of(47.5);
+  /**
+   * Physical hard stops of the hood. Lower = fully deployed (lowest/flattest shot angle), Upper =
+   * fully retracted (highest/steepest shot angle).
+   */
+  public static final Angle LOWER_HARD_LIMIT = Degrees.of(47.5), UPPER_HARD_LIMIT = Degrees.of(68);
 
   /** How far inside each hard stop the soft limits sit, so the hood doesn't slam into them */
-  public static final Angle SOFT_LIMIT_MARGIN = Degrees.of(2);
+  public static final Angle SOFT_LIMIT_MARGIN = Degrees.of(0);
 
   /** Soft limits for the hood, enforced by the motor controller */
   public static final Angle LOWER_SOFT_LIMIT = LOWER_HARD_LIMIT.plus(SOFT_LIMIT_MARGIN),
       UPPER_SOFT_LIMIT = UPPER_HARD_LIMIT.minus(SOFT_LIMIT_MARGIN);
 
   /**
-   * Hood angle low enough to fit under the trench. The hood stows here when not shooting, and only
-   * shoots from here while under a trench. TODO: confirm which end of the hood's travel is lowest
-   * (the 2026 robot stowed at its upper limit)
+   * Hood retracted (upper limit = steepest shot), which is also the most compact position for
+   * driving under the trench. Parked at the hard stop — motor holds gently against it.
    */
   public static final Angle TRENCH_SAFE_ANGLE = UPPER_SOFT_LIMIT;
 
-  /**
-   * Raw encoder readings (0 to 1 rotations) with the hood pushed against each hard stop. TODO: read
-   * "Hood/EncoderPositionRotations" in AdvantageScope with the hood pushed to each stop.
-   */
-  public static final double ENCODER_AT_LOWER_HARD_LIMIT = 0.62, ENCODER_AT_UPPER_HARD_LIMIT = 0.26;
+  /** Raw encoder readings (0 to 1 rotations) with the hood pushed against each hard stop. */
+  public static final double ENCODER_AT_LOWER_HARD_LIMIT = 0.69, ENCODER_AT_UPPER_HARD_LIMIT = 0.25;
 
   /**
    * Shifts where the encoder's reading wraps from 1 back to 0. If the reading jumps between 0 and 1
@@ -80,7 +79,7 @@ public class HoodConstants {
    *       friction, kG for the hood's weight), not KI.
    * </ul>
    */
-  public static final double KP = 2, KI = 0, KD = 0;
+  public static final double KP = 157, KI = 0, KD = 0;
 
   public static final double SIM_KP = 20, SIM_KI = 0, SIM_KD = 0;
 

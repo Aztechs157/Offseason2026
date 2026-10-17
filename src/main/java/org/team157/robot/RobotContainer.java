@@ -262,8 +262,11 @@ public class RobotContainer {
     // controller.y().whileTrue(hood.set(0.25));
     // controller.a().whileTrue(hood.set(-0.25));
     // // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
-    controller.y().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
-    controller.a().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+    controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
+    controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+    // Raw duty cycle backup - POV up deploys (lower angle), POV down retracts (higher angle)
+    controller.povUp().whileTrue(hood.set(-0.3));
+    controller.povDown().whileTrue(hood.set(0.3));
   }
 
   /**
