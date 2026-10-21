@@ -48,7 +48,7 @@ public class IntakeIOTalonFX implements IntakeIO {
                 IntakeConstants.ANGULAR_VELOCITY,
                 IntakeConstants.ANGULAR_ACCELERATION)
             .withGearing(1)
-            .withMotorInverted(true)
+            .withMotorInverted(false)
             .withIdleMode(MotorMode.COAST)
             .withStatorCurrentLimit(Amps.of(40))
             .withFollowers(Pair.of(talonfxFollower, true));

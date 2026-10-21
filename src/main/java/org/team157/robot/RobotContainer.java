@@ -38,8 +38,8 @@ import org.team157.robot.subsystems.hood.HoodConstants;
 import org.team157.robot.subsystems.hood.HoodIOSparkMax;
 import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
-// import org.team157.robot.subsystems.intake.Intake;
-// import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.intake.Intake;
+import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
 // import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
 // import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
 import org.team157.robot.subsystems.uptake.Uptake;
@@ -71,7 +71,7 @@ public class RobotContainer {
   public Hood hood = new Hood();
   public Flywheel flywheel = new Flywheel();
   public Hopper hopper = new Hopper();
-  //   public Intake intake = new Intake();
+  public Intake intake = new Intake();
   public Uptake uptake = new Uptake();
   //   public IntakeDeploy intakeDeploy = new IntakeDeploy();
 
@@ -175,8 +175,8 @@ public class RobotContainer {
     // commands are built from the IO layer.
     hood.setIO(new HoodIOSparkMax(hood));
     hood.setDefaultCommand(hood.getDefault());
-    // intake.setIO(new IntakeIOTalonFX(intake));
-    // intake.setDefaultCommand(intake.getDefault());
+    intake.setIO(new IntakeIOTalonFX(intake));
+    intake.setDefaultCommand(intake.getDefault());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
     // intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
@@ -247,7 +247,7 @@ public class RobotContainer {
     controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
 
     // Run the intake while held
-    // controller.leftTrigger().whileTrue(intake.set(1));
+    controller.leftTrigger().whileTrue(intake.set(1));
 
     // Run the hopper while held
     controller.rightBumper().whileTrue(hopper.set(0.5));

@@ -2,13 +2,9 @@ package org.team157.robot.subsystems.hood;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularAcceleration;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Time;
 import yams.gearing.GearBox;
@@ -32,17 +28,17 @@ public class HoodConstants {
   public static final Angle LOWER_HARD_LIMIT = Degrees.of(47.5), UPPER_HARD_LIMIT = Degrees.of(68);
 
   /** How far inside each hard stop the soft limits sit, so the hood doesn't slam into them */
-  public static final Angle SOFT_LIMIT_MARGIN = Degrees.of(0);
+  public static final Angle SOFT_LIMIT_MARGIN = Degrees.of(0.1);
 
   /** Soft limits for the hood, enforced by the motor controller */
   public static final Angle LOWER_SOFT_LIMIT = LOWER_HARD_LIMIT.plus(SOFT_LIMIT_MARGIN),
       UPPER_SOFT_LIMIT = UPPER_HARD_LIMIT.minus(SOFT_LIMIT_MARGIN);
 
   /**
-   * Hood retracted (upper limit = steepest shot), which is also the most compact position for
-   * driving under the trench. Parked at the hard stop — motor holds gently against it.
+   * Hood retracted (steepest shot), compact for driving under the trench. Target the hard stop
+   * position directly, not UPPER_SOFT_LIMIT (which is 2° past the physical stop).
    */
-  public static final Angle TRENCH_SAFE_ANGLE = UPPER_SOFT_LIMIT;
+  public static final Angle TRENCH_SAFE_ANGLE = UPPER_HARD_LIMIT;
 
   /** Raw encoder readings (0 to 1 rotations) with the hood pushed against each hard stop. */
   public static final double ENCODER_AT_LOWER_HARD_LIMIT = 0.69, ENCODER_AT_UPPER_HARD_LIMIT = 0.25;
@@ -64,9 +60,9 @@ public class HoodConstants {
    * PID values for the hood, run on the roboRIO by YAMS every 20ms. Units are volts per rotation of
    * the hood, so a KP of 2 applies about 0.0056V per degree of error. TODO: tune
    *
-   * <p>The 2026 robot's KP of 157 was for a Kraken X44 through 36.6:1. This hood's NEO through
-   * 0.75:1 moves about 37x faster per volt, so KP has to be much smaller. Each 1 of KP corrects
-   * about 21% of the error every 20ms loop.
+   * <p>The 2026 robot's KP of 157 was for a Kraken X44 through 36.6:1. This hood's NEO through 12:1
+   * moves about 3× faster per volt than the 36.6:1 Kraken, so KP should be roughly 3× lower. Each 1
+   * of KP corrects about 21% of the error every 20ms loop.
    *
    * <p>Tuning: graph Hood/AngleDegrees against Hood/TargetAngleDegrees in AdvantageScope.
    *
@@ -79,14 +75,9 @@ public class HoodConstants {
    *       friction, kG for the hood's weight), not KI.
    * </ul>
    */
-  public static final double KP = 157, KI = 0, KD = 0;
+  public static final double KP = 10, KI = 0, KD = 0;
 
   public static final double SIM_KP = 20, SIM_KI = 0, SIM_KD = 0;
-
-  /** Trapezoidal motion profile limits for the hood */
-  public static final AngularVelocity MAX_VELOCITY = DegreesPerSecond.of(360);
-
-  public static final AngularAcceleration MAX_ACCELERATION = DegreesPerSecondPerSecond.of(360);
 
   public static final Current CURRENT_LIMIT = Amps.of(40);
   public static final Time RAMP_RATE = Seconds.of(0.00157);

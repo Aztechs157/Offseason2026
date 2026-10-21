@@ -52,7 +52,8 @@ public class HoodIOSparkMax implements HoodIO {
             .withClosedLoopController(HoodConstants.KP, HoodConstants.KI, HoodConstants.KD)
             .withSimClosedLoopController(
                 HoodConstants.SIM_KP, HoodConstants.SIM_KI, HoodConstants.SIM_KD)
-            .withTrapezoidalProfile(HoodConstants.MAX_VELOCITY, HoodConstants.MAX_ACCELERATION)
+            // withTrapezoidalProfile removed for debugging — profile setpoint was stalling near
+            // current position, keeping PID error at ~0.2° instead of the full error
             .withIdleMode(MotorMode.BRAKE)
             // Inverted so positive output raises the hood angle (retracts toward 68 degrees).
             // Checked on the robot: before inverting, positive output (Start) lowered the angle.
