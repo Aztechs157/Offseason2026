@@ -146,8 +146,8 @@ public class RobotContainer {
     // TODO: temporary direction check, hold Y and the intake should move out and
     // IntakeDeploy/PositionInches should increase. Hold d-pad left to bring it back in.
     // Manual intake deploy/retract for testing
-    // controller.a().whileTrue(intakeDeploy.set(0.5));
-    // controller.y().whileTrue(intakeDeploy.set(-0.5));
+    controller.a().whileTrue(intakeDeploy.set(0.5));
+    controller.y().whileTrue(intakeDeploy.set(-0.5));
     // // Push the intake all the way in, then press Back to zero the rack encoder
     // controller.back().onTrue(intakeDeploy.zeroEncoder());
     controller.povDown().onTrue(intakeDeploy.deploy());

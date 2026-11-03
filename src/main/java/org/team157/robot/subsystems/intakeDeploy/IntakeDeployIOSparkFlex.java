@@ -57,8 +57,8 @@ public class IntakeDeployIOSparkFlex implements IntakeDeployIO {
             .withTrapezoidalProfile(
                 IntakeDeployConstants.MAX_VELOCITY, IntakeDeployConstants.MAX_ACCELERATION)
             .withFeedforward(IntakeDeployConstants.FEEDFORWARD)
-            .withSoftLimit(
-                IntakeDeployConstants.LOWER_SOFT_LIMIT, IntakeDeployConstants.UPPER_SOFT_LIMIT)
+            // .withSoftLimit(
+            //     IntakeDeployConstants.LOWER_SOFT_LIMIT, IntakeDeployConstants.UPPER_SOFT_LIMIT)
             .withIdleMode(MotorMode.BRAKE)
             // Not inverted: positive output and positive positions mean deploying outward (checked
             // on the robot with Y). The REV Hardware Client follows the inversion saved on the
