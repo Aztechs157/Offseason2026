@@ -40,8 +40,8 @@ import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
 import org.team157.robot.subsystems.intake.Intake;
 import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
-// import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
-// import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
 import org.team157.robot.subsystems.uptake.Uptake;
 import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
 import org.team157.robot.subsystems.vision.Vision;
@@ -73,7 +73,7 @@ public class RobotContainer {
   public Hopper hopper = new Hopper();
   public Intake intake = new Intake();
   public Uptake uptake = new Uptake();
-  //   public IntakeDeploy intakeDeploy = new IntakeDeploy();
+  public IntakeDeploy intakeDeploy = new IntakeDeploy();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -179,8 +179,8 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.getDefault());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
-    // intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
-    // intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
+    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
     flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
@@ -253,20 +253,13 @@ public class RobotContainer {
     controller.rightBumper().whileTrue(hopper.set(0.5));
 
     // Deploy or retract the intake
-    // controller.povDown().onTrue(intakeDeploy.deploy());
-    // controller.povUp().onTrue(intakeDeploy.retract());
+    controller.povDown().onTrue(intakeDeploy.deploy());
+    controller.povUp().onTrue(intakeDeploy.retract());
     // Wiggle not working
-    // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
+    controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
 
-    // TODO: temporary manual hood control
-    // controller.y().whileTrue(hood.set(0.25));
-    // controller.a().whileTrue(hood.set(-0.25));
-    // // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
     controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
-    // Raw duty cycle backup - POV up deploys (lower angle), POV down retracts (higher angle)
-    controller.povUp().whileTrue(hood.set(-0.3));
-    controller.povDown().whileTrue(hood.set(0.3));
   }
 
   /**
