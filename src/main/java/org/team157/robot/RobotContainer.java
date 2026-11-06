@@ -7,7 +7,7 @@
 
 package org.team157.robot;
 
-import static edu.wpi.first.units.Units.RPM;
+import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,7 +17,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.team157.robot.commands.DriveCommands;
 import org.team157.robot.generated.TunerConstants;
@@ -28,8 +31,10 @@ import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
 import org.team157.robot.subsystems.flywheel.Flywheel;
+import org.team157.robot.subsystems.flywheel.FlywheelConstants;
 import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
 import org.team157.robot.subsystems.hood.Hood;
+import org.team157.robot.subsystems.hood.HoodConstants;
 import org.team157.robot.subsystems.hood.HoodIOSparkMax;
 import org.team157.robot.subsystems.hopper.Hopper;
 import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
@@ -39,6 +44,11 @@ import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
 import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
 import org.team157.robot.subsystems.uptake.Uptake;
 import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
+import org.team157.robot.subsystems.vision.Vision;
+import org.team157.robot.subsystems.vision.VisionConstants;
+import org.team157.robot.subsystems.vision.VisionIO;
+import org.team157.robot.subsystems.vision.VisionIOPhotonVision;
+import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -48,7 +58,8 @@ import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
  */
 public class RobotContainer {
   // Subsystems
-  private final Drive drive;
+  public static Vision vision;
+  public static Drive drive;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -56,6 +67,7 @@ public class RobotContainer {
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
+  public static boolean dumperMode = false;
   public Hood hood = new Hood();
   public Flywheel flywheel = new Flywheel();
   public Hopper hopper = new Hopper();
@@ -77,6 +89,13 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVision(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0),
+                new VisionIOPhotonVision(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -106,6 +125,13 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
+                new VisionIOPhotonVisionSim(
+                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
         break;
 
       default:
@@ -117,6 +143,12 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        vision =
+            new Vision(
+                drive::addVisionMeasurement,
+                new VisionIO() {},
+                new VisionIO() {},
+                new VisionIO() {});
         break;
     }
 
@@ -139,45 +171,25 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Configure the button bindings
-    configureButtonBindings();
+    // Set up the mechanism subsystems. Must happen before configureButtonBindings, since their
+    // commands are built from the IO layer.
     hood.setIO(new HoodIOSparkMax(hood));
     hood.setDefaultCommand(hood.getDefault());
-    // TODO: temporary direction check, hold Start and the hood angle should increase
-    // (Hood/AngleDegrees goes up). Hold Back to lower it.
-    controller.y().whileTrue(hood.set(0.25));
-    controller.a().whileTrue(hood.set(-0.25));
-    // // TODO: temporary closed loop test, click a stick to move the hood to its min or max angle
-    // controller.leftStick().onTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
-    // controller.rightStick().onTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
     intake.setIO(new IntakeIOTalonFX(intake));
     intake.setDefaultCommand(intake.getDefault());
-    controller.leftTrigger().whileTrue(intake.set(1));
-    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
-    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
-    // TODO: temporary direction check, hold Y and the intake should move out and
-    // IntakeDeploy/PositionInches should increase. Hold d-pad left to bring it back in.
-    // Manual intake deploy/retract for testing
-    // controller.a().whileTrue(intakeDeploy.set(0.5));
-    // controller.y().whileTrue(intakeDeploy.set(-0.5));
-    // // Push the intake all the way in, then press Back to zero the rack encoder
-    // controller.back().onTrue(intakeDeploy.zeroEncoder());
-    controller.povDown().onTrue(intakeDeploy.deploy());
-    controller.povUp().onTrue(intakeDeploy.retract());
-    // // Wiggle while held, then go back out to keep intaking
-    // Wiggle not working
-    // controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
     hopper.setIO(new HopperIOTalonFX(hopper));
     hopper.setDefaultCommand(hopper.getDefault());
-    controller.rightBumper().whileTrue(hopper.set(0.5));
+    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
     uptake.setIO(new UptakeIOSparkMax(uptake));
     uptake.setDefaultCommand(uptake.getDefault());
-    controller.rightBumper().whileTrue(uptake.set(0.5));
-    flywheel.setIO(new FlywheelIOSparkflex(flywheel));
+    flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
     flywheel.setDefaultCommand(flywheel.getDefault());
-    controller.rightTrigger().whileTrue(flywheel.setVelocity(RPM.of(1550)));
     // Must be added after setIO, the SysId command is built from the IO layer
     autoChooser.addOption("Flywheel SysId", flywheel.sysId());
+
+    // Configure the button bindings
+    configureButtonBindings();
   }
 
   /**
@@ -194,6 +206,9 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+    // Keep the angle and distance to the target up to date while no other vision commands are
+    // running.
+    vision.setDefaultCommand(vision.setDefault(drive));
 
     // Lock to 0° when A and Start are held together
     controller
@@ -209,7 +224,7 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when B button is pressed
     controller
         .b()
         .onTrue(
@@ -219,6 +234,87 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    //////////////////////////////////////////////
+    ///             DRIVER COMMANDS            ///
+    //////////////////////////////////////////////
+    // Toggle Dumper Mode by pressing Start and Back together
+    controller.start().and(controller.back()).onTrue(toggleDumperMode());
+
+    // Shoot while held. In Dumper Mode the back of the robot also turns to face the target, and the
+    // flywheel speed and hood angle are calculated from the distance to the target.
+    controller.rightTrigger().and(dumperModeTrigger().negate()).whileTrue(manualShot());
+    controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
+
+    // Run the intake while held
+    controller.leftTrigger().whileTrue(intake.set(1));
+
+    // Run the hopper while held
+    controller.rightBumper().whileTrue(hopper.set(0.5));
+
+    // Deploy or retract the intake
+    controller.povDown().onTrue(intakeDeploy.deploy());
+    controller.povUp().onTrue(intakeDeploy.retract());
+    // Wiggle not working
+    controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
+
+    controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
+    controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+  }
+
+  /**
+   * Returns the current state of Dumper Mode.
+   *
+   * @return a {@link Trigger} with the current state of Dumper Mode
+   */
+  private Trigger dumperModeTrigger() {
+    return new Trigger(() -> (dumperMode));
+  }
+
+  /** Turns Dumper Mode on or off. */
+  private Command toggleDumperMode() {
+    return Commands.runOnce(
+            () -> {
+              dumperMode = !dumperMode;
+              Logger.recordOutput("DumperMode", dumperMode);
+            })
+        .ignoringDisable(true);
+  }
+
+  /**
+   * Shoots at a fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to speed.
+   */
+  private Command manualShot() {
+    return Commands.parallel(
+        flywheel.setVelocity(FlywheelConstants.MANUAL_SHOT_VELOCITY),
+        feedWhenReady(flywheel::isAtTargetVelocity));
+  }
+
+  /**
+   * Turns the back of the robot to face the target and sets the flywheel speed and hood angle for
+   * the distance to the target. Feeds balls once the flywheel is up to speed and the robot is
+   * aimed. The robot holds still while aiming, since shooting on the move is not supported.
+   */
+  private Command dumperShot() {
+    return Commands.parallel(
+        DriveCommands.joystickDriveAtAngle(
+            drive, () -> 0, () -> 0, vision::getDriveAngleToFaceTarget),
+        flywheel.setDynamicVelocity(),
+        hood.setAngle(flywheel::getDesiredHoodAngle),
+        feedWhenReady(() -> flywheel.isAtTargetVelocity() && vision.isAimed()));
+  }
+
+  /**
+   * Waits until ready to shoot, then runs the hopper and uptake to feed balls into the flywheel.
+   * Feeds anyway after {@link FlywheelConstants#SPIN_UP_TIMEOUT}, so a slow flywheel or aim can't
+   * stop the robot from shooting.
+   *
+   * @param ready Whether the robot is ready to shoot.
+   */
+  private Command feedWhenReady(BooleanSupplier ready) {
+    return Commands.waitUntil(ready)
+        .withTimeout(FlywheelConstants.SPIN_UP_TIMEOUT.in(Seconds))
+        .andThen(Commands.parallel(hopper.set(1), uptake.set(1)));
   }
 
   /**

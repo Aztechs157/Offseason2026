@@ -1,0 +1,80 @@
+// Copyright (c) 2021-2026 Littleton Robotics
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by a BSD
+// license that can be found in the LICENSE file
+// at the root directory of this project.
+
+package org.team157.robot.subsystems.vision;
+
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+
+public class VisionConstants {
+  /**
+   * Where the ball leaves the shooter, relative to the drivetrain center, facing backward. Distance
+   * to the target is measured from here. x is negative (behind center), y is 0 if the shooter is
+   * centered side to side. This is the shooter's exit point, which may be inside the bumpers, not
+   * the back edge of the robot. TODO: measure (placeholder)
+   */
+  public static final Transform2d ROBOT_TO_SHOOTER =
+      new Transform2d(-0.136421, 0.0, Rotation2d.k180deg);
+
+  /** How close the robot's heading must be to the target heading before feeding balls to shoot */
+  public static final Rotation2d AIM_TOLERANCE = Rotation2d.fromDegrees(3);
+
+  // AprilTag layout
+  public static AprilTagFieldLayout aprilTagLayout =
+      AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+
+  // Camera names, must match names configured on coprocessor
+  public static String camera0Name = "Left Cam";
+  public static String camera1Name = "Right Cam";
+
+  // Robot to camera transforms
+  // Transform:
+  //      x, y, z:
+  //      All in meters, relative to the Pigeon IMU.
+  // Rotation:
+  //      roll (about x axis) pitch (about y axis), yaw (about z axis):
+  //      All in Radians (convert from degrees), relative to the Pigeon IMU
+  // Measure these values in Onshape by selecting the Pigeon
+  //      (or origin, if that's easier, but account for the
+  //      offset from origin -> pigeon for the linear transforms)
+  //      and the lens of the camera you're measuring.
+  // Onshape coords to robot coords:
+  //      +X -> -Y
+  //      +Y -> -X
+  //      +Z -> +Z (the same)
+
+  public static Transform3d robotToCamera0 =
+      new Transform3d(0.102688, 0.314204, 0.298450, new Rotation3d(0.0, 0.0, Math.toRadians(75)));
+  public static Transform3d robotToCamera1 =
+      new Transform3d(0.102688, -0.314204, 0.298450, new Rotation3d(0.0, 0.0, Math.toRadians(-75)));
+
+  // Basic filtering thresholds
+  public static double maxAmbiguity = 0.3;
+  public static double maxZError = 0.75;
+
+  // Standard deviation baselines, for 1 meter distance and 1 tag
+  // (Adjusted automatically based on distance and # of tags)
+  public static double linearStdDevBaseline = 0.02; // Meters
+  public static double angularStdDevBaseline = 0.06; // Radians
+
+  // Standard deviation multipliers for each camera
+  // (Adjust to trust some cameras more than others)
+  public static double[] cameraStdDevFactors =
+      new double[] {
+        1.0, // Camera 0 (Left Cam)
+        1.0, // Camera 1 (Right Cam)
+      };
+
+  // Multipliers to apply for MegaTag 2 observations
+  public static double linearStdDevMegatag2Factor = 0.5; // More stable than full 3D solve
+  public static double angularStdDevMegatag2Factor =
+      Double.POSITIVE_INFINITY; // No rotation data available
+}

@@ -33,7 +33,7 @@ public final class FlywheelConstants {
       FOLLOWER_MOTOR_ID_LEFT_1 = 56,
       FOLLOWER_MOTOR_ID_LEFT_2 = 57;
   // Closed-loop control values for the flywheel.
-  public static final double KP = 2, KI = 0, KD = 0;
+  public static final double KP = 0.6, KI = 0, KD = 0.02;
   public static final double KS = 0.0, KV = 0.0, KA = 0.0;
   public static final double SIM_KP = 1.57, SIM_KI = 0, SIM_KD = 0.157;
   public static final double SIM_KS = 0.0,
@@ -49,8 +49,9 @@ public final class FlywheelConstants {
   public static final Distance FLYWHEEL_DIAMETER = Inches.of(6);
   // Mass of the flywheel (including shooter wheels), in pounds.
   public static final Mass FLYWHEEL_MASS = Pounds.of(1);
-  // Z distance from the center of the flywheel to the ground, in meters.
-  public static final Distance HEIGHT = Meters.of(0.523);
+  // Height above the floor where the ball leaves the shooter (along the hood, which can be above
+  // the flywheel's center). TODO: measure (placeholder, likely from the 2026 robot)
+  public static final Distance HEIGHT = Meters.of(0.511358);
 
   public static final Time RAMP_RATE = Seconds.of(0.00157);
   // Flywheel RPM limits for safety, in... RPM.
@@ -58,7 +59,18 @@ public final class FlywheelConstants {
       FLYWHEEL_RPM_LIMIT_LOWER = RPM.of(-5800);
   // RPM multiplier to account for external factors like air resistance and wheel slip. This is
   // determined experimentally.
-  public static final double SPEED_FACTOR = 1 / 0.385;
+  public static final double SPEED_FACTOR = 1 / 0.57;
+  // Flywheel speed when shooting with dumper mode off (hood stowed). Set from testing on the robot.
+  // TODO: tune with real shots
+  public static final AngularVelocity MANUAL_SHOT_VELOCITY = RPM.of(1550);
+  // Limits for the calculated (dumper mode) flywheel speed. The top limit is a bit under the
+  // flywheel's free speed (NEO through 32:22 is about 3900 RPM). TODO: tune
+  public static final AngularVelocity MIN_DYNAMIC_VELOCITY = RPM.of(1000),
+      MAX_DYNAMIC_VELOCITY = RPM.of(3600);
+  // How close the flywheel must be to its target speed before balls are fed in to shoot.
+  public static final AngularVelocity VELOCITY_TOLERANCE = RPM.of(100);
+  // Max time to wait for the flywheel to spin up (and the robot to aim) before feeding anyway.
+  public static final Time SPIN_UP_TIMEOUT = Seconds.of(1.5);
   public static final Current CURRENT_LIMIT = Amps.of(40);
   // SysId settings: voltage for the dynamic tests, how fast the voltage climbs in the quasistatic
   // tests, and the max time for each test.

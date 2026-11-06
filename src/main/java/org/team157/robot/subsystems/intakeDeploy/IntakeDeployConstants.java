@@ -123,7 +123,7 @@ public class IntakeDeployConstants {
    * stop. The 10 turn pot is geared 3:4 off the pinion, which these two readings account for. TODO:
    * read "IntakeDeploy/PotRaw" in AdvantageScope with the intake pushed to each stop.
    */
-  public static final double POT_AT_LOWER_HARD_LIMIT = 0.40, POT_AT_UPPER_HARD_LIMIT = 0.60;
+  public static final double POT_AT_LOWER_HARD_LIMIT = 0.05, POT_AT_UPPER_HARD_LIMIT = 0.60;
 
   /** Slope of the rack from horizontal, negative = deploying moves down. Used for visualization */
   public static final Angle RACK_ANGLE = Degrees.of(-31.732522);

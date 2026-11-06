@@ -44,13 +44,13 @@ public class Hood extends SubsystemBase {
   }
 
   /**
-   * Sets the default command of the hood, stopping motor output when no other commands are running.
-   * The motor is in brake mode, so the hood stays where it was left.
+   * Sets the default command of the hood, stowing it at {@link HoodConstants#TRENCH_SAFE_ANGLE}
+   * when no other commands are running so the robot can always drive under the trench.
    *
-   * @return Command setting the duty cycle output of the hood's motor to 0
+   * @return Command moving the hood to its trench-safe angle
    */
   public Command getDefault() {
-    return io.stop();
+    return io.setTargetAngle(HoodConstants.TRENCH_SAFE_ANGLE);
   }
 
   /**
@@ -61,11 +61,6 @@ public class Hood extends SubsystemBase {
   public Command seedEncoder() {
     return Commands.runOnce(() -> io.seedEncoder()).ignoringDisable(true);
   }
-
-  //   TODO: re impliment when have needed subsystems set up
-  //   public Command getDefault(DriveSystem drivetrain) {
-  //     return io.setTargetAngle(HoodConstants.UPPER_SOFT_LIMIT);
-  //   }
 
   /**
    * Set the target angle of the hood.
