@@ -10,6 +10,7 @@ package org.team157.robot;
 import static edu.wpi.first.units.Units.Seconds;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -151,9 +152,25 @@ public class RobotContainer {
                 new VisionIO() {});
         break;
     }
-    // NamedCommands.registerCommand("DeployIntake", intakeDeploy.deploy());
-    // NamedCommands.registerCommand("RunIntake", intake.runIntake());
-    // NamedCommands.registerCommand("DumperShot", dumperShot());
+
+    // Set up the mechanism subsystems. Must happen before configureButtonBindings, since their
+    // commands are built from the IO layer.
+    hood.setIO(new HoodIOSparkMax(hood));
+    hood.setDefaultCommand(hood.getDefault());
+    intake.setIO(new IntakeIOTalonFX(intake));
+    intake.setDefaultCommand(intake.getDefault());
+    hopper.setIO(new HopperIOTalonFX(hopper));
+    hopper.setDefaultCommand(hopper.getDefault());
+    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
+    uptake.setIO(new UptakeIOSparkMax(uptake));
+    uptake.setDefaultCommand(uptake.getDefault());
+    flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
+    flywheel.setDefaultCommand(flywheel.getDefault());
+
+    NamedCommands.registerCommand("DeployIntake", intakeDeploy.deploy());
+    NamedCommands.registerCommand("RunIntake", intake.runIntake());
+    NamedCommands.registerCommand("DumperShot", dumperShot());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -174,20 +191,6 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Set up the mechanism subsystems. Must happen before configureButtonBindings, since their
-    // commands are built from the IO layer.
-    hood.setIO(new HoodIOSparkMax(hood));
-    hood.setDefaultCommand(hood.getDefault());
-    intake.setIO(new IntakeIOTalonFX(intake));
-    intake.setDefaultCommand(intake.getDefault());
-    hopper.setIO(new HopperIOTalonFX(hopper));
-    hopper.setDefaultCommand(hopper.getDefault());
-    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
-    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
-    uptake.setIO(new UptakeIOSparkMax(uptake));
-    uptake.setDefaultCommand(uptake.getDefault());
-    flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
-    flywheel.setDefaultCommand(flywheel.getDefault());
     // Must be added after setIO, the SysId command is built from the IO layer
     autoChooser.addOption("Flywheel SysId", flywheel.sysId());
 

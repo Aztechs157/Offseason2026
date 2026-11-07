@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.8912410841654772,
-        "y": 7.458377192982456
+        "x": 3.534450784593438,
+        "y": 7.379643366619116
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.891241084165477,
-        "y": 7.458377192982456
+        "x": 4.534450784593438,
+        "y": 7.379643366619116
       },
       "isLocked": false,
       "linkedName": "LeftTrenchReturn"
@@ -95,8 +95,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -107,7 +107,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Neutral Zone",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
