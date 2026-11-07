@@ -151,6 +151,9 @@ public class RobotContainer {
                 new VisionIO() {});
         break;
     }
+    // NamedCommands.registerCommand("DeployIntake", intakeDeploy.deploy());
+    // NamedCommands.registerCommand("RunIntake", intake.runIntake());
+    // NamedCommands.registerCommand("DumperShot", dumperShot());
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -260,6 +263,11 @@ public class RobotContainer {
 
     controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+
+    // spit
+    controller.x().whileTrue(intake.set(-1));
+    controller.x().whileTrue(hopper.set(-1));
+    controller.x().whileTrue(uptake.set(-1));
   }
 
   /**
