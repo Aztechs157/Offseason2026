@@ -7,21 +7,15 @@
 
 package org.team157.robot;
 
+import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Seconds;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
+
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.team157.robot.Constants.ModifierConstants;
+import org.team157.robot.Constants.ModifierConstants.DriveControlMode;
 import org.team157.robot.commands.DriveCommands;
 import org.team157.robot.generated.TunerConstants;
 import org.team157.robot.subsystems.drive.Drive;
@@ -49,6 +43,18 @@ import org.team157.robot.subsystems.vision.VisionConstants;
 import org.team157.robot.subsystems.vision.VisionIO;
 import org.team157.robot.subsystems.vision.VisionIOPhotonVision;
 import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -260,6 +266,14 @@ public class RobotContainer {
 
     controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
+            controller.a().toggleOnTrue(flywheel.setVelocity(RPM.of(2800)));
+            controller.b().toggleOnTrue(flywheel.setVelocity(RPM.of(800)));
+
+} else {
+            controller.a().toggleOnTrue(flywheel.setDynamicVelocity());
+            controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        }
   }
 
   /**
@@ -280,6 +294,7 @@ public class RobotContainer {
             })
         .ignoringDisable(true);
   }
+  
 
   /**
    * Shoots at a fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to speed.
