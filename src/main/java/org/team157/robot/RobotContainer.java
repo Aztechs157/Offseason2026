@@ -250,6 +250,10 @@ public class RobotContainer {
     // Shoot while held. In Dumper Mode the back of the robot also turns to face the target, and the
     // flywheel speed and hood angle are calculated from the distance to the target.
     controller.rightTrigger().and(dumperModeTrigger().negate()).whileTrue(manualShot());
+    if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
+        controller.rightTrigger().and(dumperModeTrigger().whileTrue(flywheel.setVelocity(RPM.of(800))));
+    }
+        
     controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
 
     // Run the intake while held
