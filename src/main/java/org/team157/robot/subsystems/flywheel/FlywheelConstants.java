@@ -63,6 +63,7 @@ public final class FlywheelConstants {
   // Flywheel speed when shooting with dumper mode off (hood stowed). Set from testing on the robot.
   // TODO: tune with real shots
   public static final AngularVelocity MANUAL_SHOT_VELOCITY = RPM.of(1550);
+  public static final AngularVelocity DEMO_SHOT_VELOCITY = RPM.of(1000);
   // Limits for the calculated (dumper mode) flywheel speed. The top limit is a bit under the
   // flywheel's free speed (NEO through 32:22 is about 3900 RPM). TODO: tune
   public static final AngularVelocity MIN_DYNAMIC_VELOCITY = RPM.of(1000),

@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import org.team157.robot.Constants.ModifierConstants;
+import org.team157.robot.Constants.ModifierConstants.DriveControlMode;
 import org.team157.robot.commands.DriveCommands;
 import org.team157.robot.generated.TunerConstants;
 import org.team157.robot.subsystems.drive.Drive;
@@ -243,8 +245,18 @@ public class RobotContainer {
 
     // Shoot while held. In Dumper Mode the back of the robot also turns to face the target, and the
     // flywheel speed and hood angle are calculated from the distance to the target.
-    controller.rightTrigger().and(dumperModeTrigger().negate()).whileTrue(manualShot());
-    controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
+
+    controller.rightTrigger().and(demoModeTrigger()).whileTrue(demoShot());
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger().negate())
+        .and(demoModeTrigger().negate())
+        .whileTrue(manualShot());
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger())
+        .and(demoModeTrigger().negate())
+        .whileTrue(dumperShot());
 
     // Run the intake while held
     controller.leftTrigger().whileTrue(intake.set(1));
@@ -260,6 +272,14 @@ public class RobotContainer {
 
     controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+    // if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
+    //   controller.a().toggleOnTrue(flywheel.setVelocity(RPM.of(2800)));
+    //   controller.b().toggleOnTrue(flywheel.setVelocity(RPM.of(800)));
+
+    // } else {
+    //   controller.a().toggleOnTrue(flywheel.setDynamicVelocity());
+    //   controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // }
   }
 
   /**
@@ -269,6 +289,10 @@ public class RobotContainer {
    */
   private Trigger dumperModeTrigger() {
     return new Trigger(() -> (dumperMode));
+  }
+
+  private Trigger demoModeTrigger() {
+    return new Trigger(() -> (ModifierConstants.currentControlMode == DriveControlMode.DEMO));
   }
 
   /** Turns Dumper Mode on or off. */
@@ -302,6 +326,12 @@ public class RobotContainer {
         flywheel.setDynamicVelocity(),
         hood.setAngle(flywheel::getDesiredHoodAngle),
         feedWhenReady(() -> flywheel.isAtTargetVelocity() && vision.isAimed()));
+  }
+
+  private Command demoShot() {
+    return Commands.parallel(
+        flywheel.setVelocity(FlywheelConstants.DEMO_SHOT_VELOCITY),
+        feedWhenReady(flywheel::isAtTargetVelocity));
   }
 
   /**

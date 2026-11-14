@@ -44,6 +44,33 @@ public final class Constants {
     REPLAY
   }
 
+  public static class ModifierConstants {
+    public static final DriveControlMode currentControlMode = DriveControlMode.DEMO;
+
+    public static enum DriveControlMode {
+      /** No unique mode active. */
+      STANDARD,
+
+      /** Rookie mode. Applies ~60% drive speed modifier. */
+      ROOKIE,
+
+      /** Super Rookie mode. Applies ~35% drive speed modifier. */
+      SUPER_ROOKIE,
+
+      /** Demo mode. Applies ~35% drive speed modifier and enables demo commands. */
+      DEMO
+    }
+
+    // Drive speed reduction factors
+    public static final double PRECISION_DRIVE_MODIFIER = 0.4;
+    public static final double NEUTRAL_DRIVE_MODIFIER = 0.5687;
+    public static final double TRENCH_DRIVE_MODIFIER = 0.8410;
+    public static final double ROOKIE_DRIVE_MODIFIER = 0.5940;
+    public static final double DEMO_DRIVE_MODIFIER = 0.3467;
+    public static final double DEMO_ANGLE_MODIFIER = 0.6328;
+    public static final double ROOKIE_ANGLE_MODIFIER = 0.8410;
+  }
+
   public static class FieldConstants {
     public static final Distance FIELD_LENGTH = Meters.of(16.54175);
     public static final Distance FIELD_WIDTH = Meters.of(8.0137);
