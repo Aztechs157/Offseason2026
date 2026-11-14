@@ -7,11 +7,19 @@
 
 package org.team157.robot;
 
-import static edu.wpi.first.units.Units.RPM;
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.team157.robot.Constants.ModifierConstants;
@@ -43,18 +51,6 @@ import org.team157.robot.subsystems.vision.VisionConstants;
 import org.team157.robot.subsystems.vision.VisionIO;
 import org.team157.robot.subsystems.vision.VisionIOPhotonVision;
 import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -249,8 +245,18 @@ public class RobotContainer {
 
     // Shoot while held. In Dumper Mode the back of the robot also turns to face the target, and the
     // flywheel speed and hood angle are calculated from the distance to the target.
-    controller.rightTrigger().and(dumperModeTrigger().negate()).whileTrue(manualShot());
-    controller.rightTrigger().and(dumperModeTrigger()).whileTrue(dumperShot());
+
+    controller.rightTrigger().and(demoModeTrigger()).whileTrue(demoShot());
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger().negate())
+        .and(demoModeTrigger().negate())
+        .whileTrue(manualShot());
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger())
+        .and(demoModeTrigger().negate())
+        .whileTrue(dumperShot());
 
     // Run the intake while held
     controller.leftTrigger().whileTrue(intake.set(1));
@@ -266,14 +272,14 @@ public class RobotContainer {
 
     controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
-if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
-            controller.a().toggleOnTrue(flywheel.setVelocity(RPM.of(2800)));
-            controller.b().toggleOnTrue(flywheel.setVelocity(RPM.of(800)));
+    // if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
+    //   controller.a().toggleOnTrue(flywheel.setVelocity(RPM.of(2800)));
+    //   controller.b().toggleOnTrue(flywheel.setVelocity(RPM.of(800)));
 
-} else {
-            controller.a().toggleOnTrue(flywheel.setDynamicVelocity());
-            controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
-        }
+    // } else {
+    //   controller.a().toggleOnTrue(flywheel.setDynamicVelocity());
+    //   controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    // }
   }
 
   /**
@@ -285,6 +291,10 @@ if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
     return new Trigger(() -> (dumperMode));
   }
 
+  private Trigger demoModeTrigger() {
+    return new Trigger(() -> (ModifierConstants.currentControlMode == DriveControlMode.DEMO));
+  }
+
   /** Turns Dumper Mode on or off. */
   private Command toggleDumperMode() {
     return Commands.runOnce(
@@ -294,7 +304,6 @@ if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
             })
         .ignoringDisable(true);
   }
-  
 
   /**
    * Shoots at a fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to speed.
@@ -317,6 +326,12 @@ if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
         flywheel.setDynamicVelocity(),
         hood.setAngle(flywheel::getDesiredHoodAngle),
         feedWhenReady(() -> flywheel.isAtTargetVelocity() && vision.isAimed()));
+  }
+
+  private Command demoShot() {
+    return Commands.parallel(
+        flywheel.setVelocity(FlywheelConstants.DEMO_SHOT_VELOCITY),
+        feedWhenReady(flywheel::isAtTargetVelocity));
   }
 
   /**

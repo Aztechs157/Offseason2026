@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
-
 import org.team157.robot.Constants.ModifierConstants;
 import org.team157.robot.subsystems.drive.Drive;
 
@@ -50,42 +49,63 @@ public class DriveCommands {
     double linearMagnitude = MathUtil.applyDeadband(Math.hypot(x, y), DEADBAND);
     Rotation2d linearDirection = new Rotation2d(Math.atan2(y, x));
 
-        // Square magnitude for more precise control
-        linearMagnitude = modifyLinearMagnitude(linearMagnitude * linearMagnitude);
+    // Square magnitude for more precise control
+    linearMagnitude = modifyLinearMagnitude(linearMagnitude * linearMagnitude);
 
     // Return new linear velocity
     return new Pose2d(Translation2d.kZero, linearDirection)
         .transformBy(new Transform2d(linearMagnitude, 0.0, Rotation2d.kZero))
         .getTranslation();
   }
-      /**
-     * Modifies the output velocity returned by getLinearVelocityFromJoysticks based on control mode
-     * modifier constants.
-     *
-     * @param speed The speed value to be modified
-     * @return the speed value, modified based on the current control mode defined in {@link
-     *     ModifierConstants}
-     */
-    private static double modifyLinearMagnitude(final double speed) {
-        double outputSpeed = speed;
+  /**
+   * Modifies the output velocity returned by getLinearVelocityFromJoysticks based on control mode
+   * modifier constants.
+   *
+   * @param speed The speed value to be modified
+   * @return the speed value, modified based on the current control mode defined in {@link
+   *     ModifierConstants}
+   */
+  private static double modifyLinearMagnitude(final double speed) {
+    double outputSpeed = speed;
 
-        // Modifies speed based on control mode
-        switch (ModifierConstants.currentControlMode) {
-            case ROOKIE:
-                outputSpeed *= ModifierConstants.ROOKIE_DRIVE_MODIFIER;
-                break;
-            case SUPER_ROOKIE:
-                outputSpeed *= ModifierConstants.DEMO_DRIVE_MODIFIER;
-                break;
-            case DEMO:
-                outputSpeed *= ModifierConstants.DEMO_DRIVE_MODIFIER;
-                break;
-            default:
-                // No modifiers applied to drive speed.
-        }
-
-        return outputSpeed;
+    // Modifies speed based on control mode
+    switch (ModifierConstants.currentControlMode) {
+      case ROOKIE:
+        outputSpeed *= ModifierConstants.ROOKIE_DRIVE_MODIFIER;
+        break;
+      case SUPER_ROOKIE:
+        outputSpeed *= ModifierConstants.DEMO_DRIVE_MODIFIER;
+        break;
+      case DEMO:
+        outputSpeed *= ModifierConstants.DEMO_DRIVE_MODIFIER;
+        break;
+      default:
+        // No modifiers applied to drive speed.
     }
+
+    return outputSpeed;
+  }
+
+  private static double modifyAngleMagnitude(final double speed) {
+    double outputSpeed = speed;
+
+    // Modifies speed based on control mode
+    switch (ModifierConstants.currentControlMode) {
+      case ROOKIE:
+        outputSpeed *= ModifierConstants.ROOKIE_ANGLE_MODIFIER;
+        break;
+      case SUPER_ROOKIE:
+        outputSpeed *= ModifierConstants.DEMO_ANGLE_MODIFIER;
+        break;
+      case DEMO:
+        outputSpeed *= ModifierConstants.DEMO_ANGLE_MODIFIER;
+        break;
+      default:
+        // No modifiers applied to drive speed.
+    }
+
+    return outputSpeed;
+  }
 
   /**
    * Field relative drive command using two joysticks (controlling linear and angular velocities).
@@ -103,6 +123,7 @@ public class DriveCommands {
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+          omega = modifyAngleMagnitude(omega);
 
           // Square rotation value for more precise control
           omega = Math.copySign(omega * omega, omega);
