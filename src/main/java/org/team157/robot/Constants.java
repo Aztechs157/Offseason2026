@@ -66,6 +66,7 @@ public final class Constants {
     public static final double NEUTRAL_DRIVE_MODIFIER = 0.5687;
     public static final double TRENCH_DRIVE_MODIFIER = 0.8410;
     public static final double ROOKIE_DRIVE_MODIFIER = 0.5940;
+    // Turn speed reduction factors
     public static final double DEMO_DRIVE_MODIFIER = 0.3467;
     public static final double DEMO_ANGLE_MODIFIER = 0.6328;
     public static final double ROOKIE_ANGLE_MODIFIER = 0.8410;

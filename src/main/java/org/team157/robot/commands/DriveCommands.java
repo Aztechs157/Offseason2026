@@ -123,6 +123,8 @@ public class DriveCommands {
 
           // Apply rotation deadband
           double omega = MathUtil.applyDeadband(omegaSupplier.getAsDouble(), DEADBAND);
+          
+          // apply rotation modifier based on control mode
           omega = modifyAngleMagnitude(omega);
 
           // Square rotation value for more precise control

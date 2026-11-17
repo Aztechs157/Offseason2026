@@ -245,13 +245,18 @@ public class RobotContainer {
 
     // Shoot while held. In Dumper Mode the back of the robot also turns to face the target, and the
     // flywheel speed and hood angle are calculated from the distance to the target.
+    // In Demo Mode the flywheel speed is fixed, and the robot does not aim.
 
+    // fire demo shot when the robot is in demo mode
     controller.rightTrigger().and(demoModeTrigger()).whileTrue(demoShot());
+    // fire manual shot when the robot is not in demo mode and not in dumper mode
     controller
         .rightTrigger()
         .and(dumperModeTrigger().negate())
         .and(demoModeTrigger().negate())
         .whileTrue(manualShot());
+
+    // fire dumper shot when the robot is in dumper mode and not in demo mode
     controller
         .rightTrigger()
         .and(dumperModeTrigger())
@@ -272,14 +277,6 @@ public class RobotContainer {
 
     controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
-    // if (ModifierConstants.currentControlMode == DriveControlMode.DEMO) {
-    //   controller.a().toggleOnTrue(flywheel.setVelocity(RPM.of(2800)));
-    //   controller.b().toggleOnTrue(flywheel.setVelocity(RPM.of(800)));
-
-    // } else {
-    //   controller.a().toggleOnTrue(flywheel.setDynamicVelocity());
-    //   controller.b().onTrue(Commands.runOnce(drive::stopWithX, drive));
-    // }
   }
 
   /**
@@ -291,6 +288,11 @@ public class RobotContainer {
     return new Trigger(() -> (dumperMode));
   }
 
+  /**
+   * Returns the current state of Demo Mode.
+   *
+   * @return a {@link Trigger} with the current state of Demo Mode
+   */
   private Trigger demoModeTrigger() {
     return new Trigger(() -> (ModifierConstants.currentControlMode == DriveControlMode.DEMO));
   }
@@ -328,6 +330,9 @@ public class RobotContainer {
         feedWhenReady(() -> flywheel.isAtTargetVelocity() && vision.isAimed()));
   }
 
+    /**
+   * Shoots at a slower fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to speed.
+   */
   private Command demoShot() {
     return Commands.parallel(
         flywheel.setVelocity(FlywheelConstants.DEMO_SHOT_VELOCITY),
