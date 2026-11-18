@@ -23,8 +23,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import org.team157.robot.Constants.ModifierConstants;
-import org.team157.robot.Constants.ModifierConstants.DriveControlMode;
 import org.team157.robot.commands.DriveCommands;
 import org.team157.robot.generated.TunerConstants;
 import org.team157.robot.subsystems.drive.Drive;
@@ -61,22 +59,17 @@ import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
  */
 public class RobotContainer {
   // Subsystems
-  public static Vision vision;
-  public static Drive drive;
+  private final Drive drive;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandXboxController controller = new CommandXboxController(1);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
 
-  public static boolean dumperMode = false;
-  public Hood hood = new Hood();
-  public Flywheel flywheel = new Flywheel();
-  public Hopper hopper = new Hopper();
-  public Intake intake = new Intake();
-  public Uptake uptake = new Uptake();
-  public IntakeDeploy intakeDeploy = new IntakeDeploy();
+  // joystick
+  Joystick joystick =
+      new Joystick(0); // 0 is the USB Port to be used as indicated on the Driver Station
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -92,13 +85,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVision(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0),
-                new VisionIOPhotonVision(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1));
 
         // The ModuleIOTalonFXS implementation provides an example implementation for
         // TalonFXS controller connected to a CANdi with a PWM encoder. The
@@ -128,13 +114,6 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
-                new VisionIOPhotonVisionSim(
-                    VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
         break;
 
       default:
@@ -146,12 +125,6 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
-        vision =
-            new Vision(
-                drive::addVisionMeasurement,
-                new VisionIO() {},
-                new VisionIO() {},
-                new VisionIO() {});
         break;
     }
 
@@ -196,9 +169,6 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
-    // Must be added after setIO, the SysId command is built from the IO layer
-    autoChooser.addOption("Flywheel SysId", flywheel.sysId());
-
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -213,18 +183,10 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
-    // Keep the angle and distance to the target up to date while no other vision commands are
-    // running.
-    vision.setDefaultCommand(vision.setDefault(drive));
-
-    // Lock to 0° when A and Start are held together
+            drive, () -> -joystick.getY(), () -> -joystick.getX(), () -> -joystick.getTwist()));
+    // Lock to 0° when A button is held
     controller
         .a()
-        .and(controller.start())
         .whileTrue(
             DriveCommands.joystickDriveAtAngle(
                 drive,
@@ -235,7 +197,7 @@ public class RobotContainer {
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-    // Reset gyro to 0° when B button is pressed
+    // Reset gyro to 0° when B button is pressed
     controller
         .b()
         .onTrue(

@@ -3,7 +3,7 @@ package org.team157.robot;
 /** Automatically generated file containing build version information. */
 public final class BuildConstants {
   public static final String MAVEN_GROUP = "";
-  public static final String MAVEN_NAME = "Offseason2026";
+  public static final String MAVEN_NAME = "Offseason2026-1";
   public static final String VERSION = "unspecified";
   public static final int GIT_REVISION = 87;
   public static final String GIT_SHA = "d2fd22825e3dfdbd291a395c577e59a75bebeeb7";

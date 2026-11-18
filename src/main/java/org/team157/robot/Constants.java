@@ -7,16 +7,7 @@
 
 package org.team157.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.Meters;
-
-import com.ctre.phoenix6.CANBus;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.RobotBase;
-import org.team157.robot.parsing.PositionDetails;
-import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
 
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
@@ -24,12 +15,6 @@ import yams.motorcontrollers.SmartMotorControllerConfig.TelemetryVerbosity;
  * (log replay from a file).
  */
 public final class Constants {
-  public static class TelemetryConstants {
-    public static final TelemetryVerbosity TELEMETRY_VERBOSITY = TelemetryVerbosity.LOW;
-  }
-
-  public static final CANBus RIO_CAN_BUS = new CANBus("rio", "./logs/example.hoot");
-  public static final CANBus DRIVE_CAN_BUS = new CANBus("canivore", "./logs/example2.hoot");
   public static final Mode simMode = Mode.SIM;
   public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
@@ -42,48 +27,5 @@ public final class Constants {
 
     /** Replaying from a log file. */
     REPLAY
-  }
-
-  public static class ModifierConstants {
-    public static final DriveControlMode currentControlMode = DriveControlMode.DEMO;
-
-    public static enum DriveControlMode {
-      /** No unique mode active. */
-      STANDARD,
-
-      /** Rookie mode. Applies ~60% drive speed modifier. */
-      ROOKIE,
-
-      /** Super Rookie mode. Applies ~35% drive speed modifier. */
-      SUPER_ROOKIE,
-
-      /** Demo mode. Applies ~35% drive speed modifier and enables demo commands. */
-      DEMO
-    }
-
-    // Drive speed reduction factors
-    public static final double PRECISION_DRIVE_MODIFIER = 0.4;
-    public static final double NEUTRAL_DRIVE_MODIFIER = 0.5687;
-    public static final double TRENCH_DRIVE_MODIFIER = 0.8410;
-    public static final double ROOKIE_DRIVE_MODIFIER = 0.5940;
-    // Turn speed reduction factors
-    public static final double DEMO_DRIVE_MODIFIER = 0.3467;
-    public static final double DEMO_ANGLE_MODIFIER = 0.6328;
-    public static final double ROOKIE_ANGLE_MODIFIER = 0.8410;
-  }
-
-  public static class FieldConstants {
-    public static final Distance FIELD_LENGTH = Meters.of(16.54175);
-    public static final Distance FIELD_WIDTH = Meters.of(8.0137);
-    /** Manual reset position in blue alliance HP corner */
-    public static final Pose2d MANUAL_RESET_POSE_BLUE = new Pose2d(0.441, 0.441, new Rotation2d());
-    /** Manual reset position in red alliance HP corner */
-    public static final Pose2d MANUAL_RESET_POSE_RED =
-        new Pose2d(
-            FieldConstants.FIELD_LENGTH.in(Meters) - 0.441,
-            FieldConstants.FIELD_WIDTH.in(Meters) - 0.441,
-            new Rotation2d(Degrees.of(180)));
-
-    public static final PositionDetails positionDetails = new PositionDetails();
   }
 }
