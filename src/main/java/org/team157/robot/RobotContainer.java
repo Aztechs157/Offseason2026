@@ -7,16 +7,21 @@
 
 package org.team157.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
+
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import java.util.function.BooleanSupplier;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.team157.robot.commands.DriveCommands;
 import org.team157.robot.generated.TunerConstants;
@@ -26,6 +31,25 @@ import org.team157.robot.subsystems.drive.GyroIOPigeon2;
 import org.team157.robot.subsystems.drive.ModuleIO;
 import org.team157.robot.subsystems.drive.ModuleIOSim;
 import org.team157.robot.subsystems.drive.ModuleIOTalonFX;
+import org.team157.robot.subsystems.flywheel.Flywheel;
+import org.team157.robot.subsystems.flywheel.FlywheelConstants;
+import org.team157.robot.subsystems.flywheel.FlywheelIOSparkflex;
+import org.team157.robot.subsystems.hood.Hood;
+import org.team157.robot.subsystems.hood.HoodConstants;
+import org.team157.robot.subsystems.hood.HoodIOSparkMax;
+import org.team157.robot.subsystems.hopper.Hopper;
+import org.team157.robot.subsystems.hopper.HopperIOTalonFX;
+import org.team157.robot.subsystems.intake.Intake;
+import org.team157.robot.subsystems.intake.IntakeIOTalonFX;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeploy;
+import org.team157.robot.subsystems.intakeDeploy.IntakeDeployIOSparkFlex;
+import org.team157.robot.subsystems.uptake.Uptake;
+import org.team157.robot.subsystems.uptake.UptakeIOSparkMax;
+import org.team157.robot.subsystems.vision.Vision;
+import org.team157.robot.subsystems.vision.VisionConstants;
+import org.team157.robot.subsystems.vision.VisionIO;
+import org.team157.robot.subsystems.vision.VisionIOPhotonVision;
+import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -104,6 +128,28 @@ public class RobotContainer {
         break;
     }
 
+    // Set up the mechanism subsystems. Must happen before configureButtonBindings, since their
+    // commands are built from the IO layer.
+    hood.setIO(new HoodIOSparkMax(hood));
+    hood.setDefaultCommand(hood.getDefault());
+    intake.setIO(new IntakeIOTalonFX(intake));
+    intake.setDefaultCommand(intake.getDefault());
+    hopper.setIO(new HopperIOTalonFX(hopper));
+    hopper.setDefaultCommand(hopper.getDefault());
+    intakeDeploy.setIO(new IntakeDeployIOSparkFlex(intakeDeploy));
+    intakeDeploy.setDefaultCommand(intakeDeploy.getDefault());
+    uptake.setIO(new UptakeIOSparkMax(uptake));
+    uptake.setDefaultCommand(uptake.getDefault());
+    flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
+    flywheel.setDefaultCommand(flywheel.getDefault());
+
+    // deploy intake
+    NamedCommands.registerCommand("DeployIntake", intakeDeploy.deploy());
+    // run intake
+    NamedCommands.registerCommand("RunIntake", intake.runIntake());
+    // dumper shot
+    NamedCommands.registerCommand("DumperShot", dumperShot());
+
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -161,6 +207,129 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+
+    //////////////////////////////////////////////
+    ///             DRIVER COMMANDS            ///
+    //////////////////////////////////////////////
+    // Toggle Dumper Mode by pressing Start and Back together
+    controller.start().and(controller.back()).onTrue(toggleDumperMode());
+
+    // Shoot while held. In Dumper Mode the back of the robot also turns to face the target, and the
+    // flywheel speed and hood angle are calculated from the distance to the target.
+    // In Demo Mode the flywheel speed is fixed, and the robot does not aim.
+
+    // fire demo shot when the robot is in demo mode
+    controller.rightTrigger().and(demoModeTrigger()).whileTrue(demoShot());
+    // fire manual shot when the robot is not in demo mode and not in dumper mode
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger().negate())
+        .and(demoModeTrigger().negate())
+        .whileTrue(manualShot());
+
+    // fire dumper shot when the robot is in dumper mode and not in demo mode
+    controller
+        .rightTrigger()
+        .and(dumperModeTrigger())
+        .and(demoModeTrigger().negate())
+        .whileTrue(dumperShot());
+
+    // Run the intake while held
+    controller.leftTrigger().whileTrue(intake.set(1));
+
+    // Run the hopper while held
+    controller.rightBumper().whileTrue(hopper.set(0.5));
+
+    // Deploy or retract the intake
+    controller.povDown().onTrue(intakeDeploy.deploy());
+    controller.povUp().onTrue(intakeDeploy.retract());
+    // Wiggle not working
+    controller.povRight().whileTrue(intakeDeploy.wiggle()).onFalse(intakeDeploy.deploy());
+
+    controller.y().whileTrue(hood.setAngle(HoodConstants.LOWER_SOFT_LIMIT));
+    controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
+
+    // spit
+    controller.x().whileTrue(spit());
+  }
+
+  /** runs hopper, intake, and uptake in reverse */
+  private Command spit() {
+    return Commands.parallel(intake.set(-1), hopper.set(-1), uptake.set(-1));
+  }
+
+  /**
+   * Returns the current state of Dumper Mode.
+   *
+   * @return a {@link Trigger} with the current state of Dumper Mode
+   */
+  private Trigger dumperModeTrigger() {
+    return new Trigger(() -> (dumperMode));
+  }
+
+  /**
+   * Returns the current state of Demo Mode.
+   *
+   * @return a {@link Trigger} with the current state of Demo Mode
+   */
+  private Trigger demoModeTrigger() {
+    return new Trigger(() -> (ModifierConstants.currentControlMode == DriveControlMode.DEMO));
+  }
+
+  /** Turns Dumper Mode on or off. */
+  private Command toggleDumperMode() {
+    return Commands.runOnce(
+            () -> {
+              dumperMode = !dumperMode;
+              Logger.recordOutput("DumperMode", dumperMode);
+            })
+        .ignoringDisable(true);
+  }
+
+  /**
+   * Shoots at a fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to speed.
+   */
+  private Command manualShot() {
+    return Commands.parallel(
+        flywheel.setVelocity(FlywheelConstants.MANUAL_SHOT_VELOCITY),
+        feedWhenReady(flywheel::isAtTargetVelocity));
+  }
+
+  /**
+   * Turns the back of the robot to face the target and sets the flywheel speed and hood angle for
+   * the distance to the target. Feeds balls once the flywheel is up to speed and the robot is
+   * aimed. The robot holds still while aiming, since shooting on the move is not supported.
+   */
+  private Command dumperShot() {
+    return Commands.parallel(
+        DriveCommands.joystickDriveAtAngle(
+            drive, () -> 0, () -> 0, vision::getDriveAngleToFaceTarget),
+        flywheel.setDynamicVelocity(),
+        hood.setAngle(flywheel::getDesiredHoodAngle),
+        feedWhenReady(() -> flywheel.isAtTargetVelocity() && vision.isAimed()));
+  }
+
+  /**
+   * Shoots at a slower fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to
+   * speed.
+   */
+  private Command demoShot() {
+    return Commands.parallel(
+        flywheel.setVelocity(FlywheelConstants.DEMO_SHOT_VELOCITY),
+        feedWhenReady(flywheel::isAtTargetVelocity));
+  }
+
+  /**
+   * Waits until ready to shoot, then runs the hopper and uptake to feed balls into the flywheel.
+   * Feeds anyway after {@link FlywheelConstants#SPIN_UP_TIMEOUT}, so a slow flywheel or aim can't
+   * stop the robot from shooting.
+   *
+   * @param ready Whether the robot is ready to shoot.
+   */
+  private Command feedWhenReady(BooleanSupplier ready) {
+    return Commands.waitUntil(ready)
+        .withTimeout(FlywheelConstants.SPIN_UP_TIMEOUT.in(Seconds))
+        .andThen(Commands.parallel(hopper.set(1), uptake.set(1)));
   }
 
   /**
