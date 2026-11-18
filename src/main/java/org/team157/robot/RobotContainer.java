@@ -9,8 +9,18 @@ package org.team157.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import java.util.function.BooleanSupplier;
-
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 import org.team157.robot.Constants.ModifierConstants;
@@ -42,19 +52,6 @@ import org.team157.robot.subsystems.vision.VisionConstants;
 import org.team157.robot.subsystems.vision.VisionIO;
 import org.team157.robot.subsystems.vision.VisionIOPhotonVision;
 import org.team157.robot.subsystems.vision.VisionIOPhotonVisionSim;
-
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -173,11 +170,11 @@ public class RobotContainer {
     flywheel.setIO(new FlywheelIOSparkflex(flywheel), vision);
     flywheel.setDefaultCommand(flywheel.getDefault());
 
-    //deploy intake
+    // deploy intake
     NamedCommands.registerCommand("DeployIntake", intakeDeploy.deploy());
-    //run intake
+    // run intake
     NamedCommands.registerCommand("RunIntake", intake.runIntake());
-    //dumper shot
+    // dumper shot
     NamedCommands.registerCommand("DumperShot", dumperShot());
 
     // Set up auto routines
@@ -291,15 +288,12 @@ public class RobotContainer {
     controller.a().whileTrue(hood.setAngle(HoodConstants.UPPER_SOFT_LIMIT));
 
     // spit
-    controller.x().whileTrue(Spit());
+    controller.x().whileTrue(spit());
   }
 
   /** runs hopper, intake, and uptake in reverse */
-  private Command Spit(){
-    return Commands.parallel(
-    intake.set(-1), 
-    hopper.set(-1), 
-    uptake.set(-1));
+  private Command spit() {
+    return Commands.parallel(intake.set(-1), hopper.set(-1), uptake.set(-1));
   }
 
   /**
@@ -353,8 +347,9 @@ public class RobotContainer {
         feedWhenReady(() -> flywheel.isAtTargetVelocity() && vision.isAimed()));
   }
 
-    /**
-   * Shoots at a slower fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to speed.
+  /**
+   * Shoots at a slower fixed flywheel speed, without aiming. Feeds balls once the flywheel is up to
+   * speed.
    */
   private Command demoShot() {
     return Commands.parallel(
